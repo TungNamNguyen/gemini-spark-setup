@@ -119,7 +119,7 @@ công ty dưới đây. Chỉ tìm vị trí liên quan đến data/analytics.
 
 NAB Innovation Centre Vietnam, Crossian, VNG, Grab Vietnam, Shopee Vietnam,
 MoMo, ZaloPay, VNPAY, Techcombank, VPBank, MB Bank, Vingroup, VinSmart Future,
-One Mount, Be Group, Lazada Vietnam.
+One Mount, Be Group, Lazada Vietnam, GreenSM.
 
 **Quy tắc:**
 
