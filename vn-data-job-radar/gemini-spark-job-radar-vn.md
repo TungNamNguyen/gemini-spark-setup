@@ -1,8 +1,8 @@
 # Gemini Spark — Job Radar cho ngành Data (Hà Nội / TP.HCM)
 
-**Phiên bản 3** — cấu trúc Sheet 3 tab, Gmail Job Alerts làm nguồn chính, remote browser, kèm hướng dẫn setup từng bước.
+**Phiên bản 3.1** — cấu trúc Sheet 3 tab, Gmail Job Alerts làm nguồn chính, remote browser, task dọn dẹp tách riêng, kèm hướng dẫn setup từng bước.
 
-Thời gian setup: khoảng 55 phút, trong đó 15 phút là chờ test.
+Thời gian setup: khoảng 60 phút, trong đó 15 phút là chờ test.
 
 - [Phần 0 — Setup từng bước](#phần-0--setup-từng-bước) ← bắt đầu ở đây
 - [Phần 1 — Nội dung Skill](#phần-1--nội-dung-skill)
@@ -74,7 +74,7 @@ Job Radar Tracker
 
 ### 3.3 Tab 2: `jobs_detail`
 
-Tab này Spark **chỉ ghi** trong lần chạy thường. Chỉ đọc một lần mỗi tuần khi dọn dẹp (sáng thứ Hai).
+Tab này Spark **chỉ ghi** trong task quét. Chỉ task dọn dẹp (`mode: cleanup`, sáng thứ Hai) mới đọc.
 
 1. Tạo tab mới, đặt tên `jobs_detail`
 2. Dòng 1 điền đúng 8 cột này:
@@ -219,6 +219,14 @@ Kiểm tra: work panel cho thấy nó **chỉ** đọc Gmail, Xóm Jobs, LinkedI
 
 Lặp lại Bước 5 với instruction **Task 2 (TP.HCM)**. Chạy tay 1 lần để chắc nó hoạt động. Không cần test chống trùng lại vì cùng một sheet.
 
+## Bước 8b — Tạo Task dọn dẹp (3 phút)
+
+Lặp lại Bước 5 với instruction **Task 3 (Dọn dẹp)**. Chạy tay 1 lần.
+
+**Kết quả đúng:** một email riêng, tiêu đề `[Job Radar] Dọn dẹp tuần — SKIPPED — {dd/MM}` với lý do "chưa đủ dữ liệu để dọn" (vì `jobs_detail` mới có vài chục dòng). Sheet **không thay đổi gì**.
+
+**Kết quả sai:** nó bắt đầu quét web hoặc đọc Gmail → nhắn: *"mode: cleanup không quét gì cả, chỉ làm mục 'Chế độ cleanup' trong skill."* Hoặc nó xoá dòng trong sheet dù chưa đủ 50 dòng → nhắn: *"Guard đầu tiên: jobs_detail dưới 50 dòng thì SKIPPED, không được xoá."*
+
 ## Bước 9 — Bật Schedule (3 phút)
 
 Giờ mới đặt lịch. Với **mỗi** task, mở thread và nhắn 2 câu (nhắn riêng từng câu):
@@ -235,13 +243,19 @@ Tạo lịch: mỗi ngày lúc 17:30 giờ Việt Nam, chạy với mode: quick.
 
 **Task TP.HCM:** giống hệt, đổi giờ thành **08:20** và **17:50**.
 
-Lệch 20 phút để hai task không chạy chồng nhau — task `full` sáng có thể mất hơn 15 phút vì quét 16 career page.
+**Task Dọn dẹp** (chỉ 1 câu):
+
+```
+Tạo lịch: mỗi thứ Hai lúc 07:00 giờ Việt Nam, chạy với mode: cleanup.
+```
+
+Lệch 20 phút giữa hai task quét để không chạy chồng nhau — task `full` sáng có thể mất hơn 15 phút vì quét 16 career page. Task dọn dẹp chạy **07:00, trước cả hai task quét** một tiếng, để không có task nào đọc/ghi sheet trong lúc nó xoá dòng.
 
 > Vì dùng remote browser nên không cần máy bật đúng giờ — chọn giờ nào cũng được. 08:00 để email có trước giờ làm.
 
-> **Sáng thứ Hai** task Hà Nội sẽ chạy thêm bước dọn dẹp (chuyển dòng >90 ngày sang `archive`). Task TP.HCM không làm việc này. Lần đầu tiên bước này có tác dụng là sau ~3 tháng.
+> Task dọn dẹp gửi email riêng mỗi thứ Hai, kể cả khi không có gì để dọn (`SKIPPED`). Trong ~3 tháng đầu bạn sẽ chỉ thấy `SKIPPED` — đó là bình thường.
 
-**Kiểm tra:** mở work panel → mục **Schedules** → phải thấy đúng 2 lịch cho mỗi task, tổng 4 lịch.
+**Kiểm tra:** mở work panel → mục **Schedules** → phải thấy 2 lịch cho mỗi task quét + 1 lịch cho task dọn dẹp, tổng **5 lịch**.
 
 ## Bước 10 — Tuần đầu: theo dõi và tinh chỉnh
 
@@ -256,11 +270,12 @@ Lệch 20 phút để hai task không chạy chồng nhau — task `full` sáng 
 | Quá nhiều tin rác                                              | Bộ lọc lỏng                                         | Nhắn:`Loại hết tin từ công ty outsourcing và headhunt, chỉ giữ product company, ngân hàng, fintech` |
 | Quá ít tin                                                      | Alert Gmail chưa về hoặc filter chưa gắn label    | Xem Bước 3b.4                                                                                                 |
 | Toàn tin senior                                                  | Chưa lọc YOE                                         | Nhắn:`Chỉ giữ tin yêu cầu dưới 3 năm kinh nghiệm`                                                    |
+| Thứ Hai không có email dọn dẹp | Task 3 chưa có lịch hoặc bị pause | Work panel → Schedules của Task 3 |
 | Cùng 1 tin hiện 2–3 dòng                                      | Gộp theo`company\|title` chưa chạy                 | Nhắn:`Gộp các tin cùng công ty và cùng tiêu đề thành 1 dòng theo Bước 5 của skill`             |
 
 ## Bước 11 — Sau 1 tháng (tuỳ chọn)
 
-Skill đã có sẵn bước dọn dẹp hàng tuần, đẩy dòng cũ hơn 90 ngày sang tab `archive`. Bạn không phải làm gì.
+Task dọn dẹp chạy mỗi thứ Hai, đẩy dòng cũ hơn 90 ngày sang tab `archive`. Bạn không phải làm gì ngoài liếc qua email báo cáo: khi kết quả chuyển từ `SKIPPED` sang `DONE` lần đầu, mở sheet kiểm tra một lần cho chắc.
 
 Nhưng đừng xoá `archive`. Sau vài tháng đó là dataset dọc về thị trường tuyển dụng data ở VN — mức lương theo thời gian, công ty nào tuyển đều, stack nào đang lên. Với người làm phân tích, thứ đó có khi giá trị hơn cái email hàng ngày.
 
@@ -281,7 +296,7 @@ Tóm tắt luồng để bạn đối chiếu khi đọc work panel:
 | 5                  | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                           |
 | 6                  | Chuẩn hoá URL                                                                                                                  |
 | 7                  | Ghi`seen_urls` + `jobs_detail`                                                                                               |
-| 7b                 | Sáng thứ Hai, task Hà Nội, mode full: archive dòng >90 ngày (có guard 30%)                                                |
+| `cleanup` (task riêng) | Sáng thứ Hai 07:00: archive dòng >90 ngày (guard 30%), gửi email báo cáo riêng, không quét gì |
 | 8                  | Gửi email HTML                                                                                                                  |
 
 ---
@@ -320,9 +335,26 @@ Tham số:
 Làm đúng theo skill, đặc biệt:
 - Bước 1 đọc tab "seen_urls" của Google Sheet "Job Radar Tracker" TRƯỚC mọi việc khác
 - Bước 7 ghi sheet TRƯỚC khi gửi email
-- Bước 7b (dọn dẹp thứ Hai) luôn BỎ QUA — task Hà Nội đã làm việc đó
 - Dùng remote browser, không cần Chrome local. Gặp captcha hay tường đăng nhập
   thì ghi nhận và đi tiếp, không chờ tôi.
+
+Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
+```
+
+## Task 3 — Dọn dẹp hàng tuần
+
+```
+Dùng skill /vn-data-job-radar.
+
+Tham số:
+- mode: cleanup
+- Email gửi về: [ĐIỀN EMAIL CỦA BẠN]
+
+Không quét web, không đọc Gmail. Chỉ làm mục "Chế độ cleanup" trong skill:
+đọc Google Sheet "Job Radar Tracker" tab "jobs_detail", chuyển các dòng có
+first_sent_at cũ hơn 90 ngày sang tab "archive", xoá URL tương ứng khỏi
+"seen_urls", rồi gửi một email báo cáo ngắn. Tuân thủ đủ các guard an toàn
+trong skill — nếu không thoả guard thì không xoá gì và báo SKIPPED hoặc BLOCKED.
 
 Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
 ```
@@ -331,10 +363,11 @@ Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
 
 ## Bảng lịch
 
-| Task     | Sáng (`mode: full`) | Chiều (`mode: quick`) |
-| -------- | ---------------------- | ------------------------ |
-| Hà Nội | 08:00                  | 17:30                    |
-| TP.HCM   | 08:20                  | 17:50                    |
+| Task     | Sáng (`mode: full`) | Chiều (`mode: quick`) | Thứ Hai (`mode: cleanup`) |
+| -------- | ---------------------- | ------------------------ | --- |
+| Hà Nội | 08:00                  | 17:30                    | — |
+| TP.HCM   | 08:20                  | 17:50                    | — |
+| Dọn dẹp | — | — | 07:00 |
 
 ---
 
@@ -359,9 +392,9 @@ Tiêu đề email: [Job Radar] {NHÓM VỊ TRÍ} — {THÀNH PHỐ} — {N} tin 
 Vì chỉ một nhóm vị trí, thay cấu trúc 5 section bằng một bảng duy nhất,
 sắp xếp theo mức lương giảm dần (tin "Thoả thuận" và "không rõ" xếp cuối).
 
-Bước 7b (dọn dẹp thứ Hai): chỉ task "Hà Nội — Data Analyst" được làm.
-Các task khác luôn bỏ qua.
 ```
+
+Dọn dẹp vẫn dùng **Task 3** riêng như Phần 2, lịch thứ Hai 07:00. Không nhét dọn dẹp vào 10 task quét.
 
 **Giờ chạy so le:**
 
@@ -456,12 +489,16 @@ Nhiều nhà tuyển dụng VN "làm mới" tin cũ để đẩy lên đầu, n�
 
 Sheet chống trùng xử lý được phần lớn: một khi URL đã vào `seen_urls` thì dù tin được làm mới bao nhiêu lần cũng không gửi lại. Đây là lý do nên để cửa sổ dọn dẹp tới 90 ngày chứ không phải 7 ngày.
 
-## Sáng thứ Hai email báo "Dọn dẹp bị hoãn"
+## Email dọn dẹp báo BLOCKED hoặc FAILED
 
-Skill có guard: nếu số dòng cần archive vượt 30% tổng `jobs_detail`, nó dừng và báo thay vì xoá. Thường gặp khi:
+**BLOCKED** — guard 30%: số dòng cần archive vượt 30% tổng `jobs_detail`, task dừng và báo thay vì xoá. Thường gặp khi:
 
-- Lần đầu tiên chạy 7b sau đúng 90 ngày (mọi dòng đều cũ cùng lúc) → mở sheet, tự cut các dòng cũ sang `archive` một lần bằng tay, rồi tuần sau skill tự chạy bình thường.
+- Lần đầu tiên có dòng đủ 90 ngày (mọi dòng đầu tiên đều cũ cùng lúc) → mở sheet, tự cut các dòng cũ sang `archive` một lần bằng tay, rồi tuần sau task tự chạy bình thường.
 - Cột `first_sent_at` bị nhập sai định dạng ở một số dòng → sửa về ISO 8601.
+
+**FAILED** — đã append vào `archive` nhưng số dòng không khớp, task dừng trước khi xoá. Sheet đang ở trạng thái: `archive` có thể có dòng trùng, `jobs_detail` và `seen_urls` **chưa mất gì**. Mở `archive`, xoá các dòng vừa append (nhìn theo `first_sent_at`), rồi chạy lại task bằng tay.
+
+Cả hai trường hợp đều **không mất dữ liệu** — thiết kế là "append trước, xoá sau".
 
 ## Giới hạn dung lượng Sheet
 
@@ -510,5 +547,5 @@ Spark là tính năng thử nghiệm, giai đoạn đầu. Vài điều nên bi�
 
 - **Không gõ thông tin nhạy cảm vào task thread** — mật khẩu, thông tin thanh toán. Nếu cần đăng nhập, dùng "Take control" rồi nhập trực tiếp trên trang web.
 - **Prompt injection là rủi ro thật.** Một trang tuyển dụng hoặc một email alert có thể chứa chỉ dẫn ẩn mà bạn không thấy nhưng agent đọc được. Vì task này chỉ đọc web/email và ghi vào một sheet riêng nên rủi ro thấp, nhưng vẫn nên liếc qua email trước khi bấm link.
-- **Nếu schedule chạy lúc bạn offline**, bạn không kịp dừng nếu nó làm gì đó ngoài ý muốn. Bước 7b (xoá dòng trong sheet) đã có guard, nhưng vẫn nên liếc qua sheet mỗi sáng thứ Hai trong tháng đầu.
+- **Nếu schedule chạy lúc bạn offline**, bạn không kịp dừng nếu nó làm gì đó ngoài ý muốn. Task dọn dẹp (xoá dòng trong sheet) đã có guard và email báo cáo riêng, nhưng vẫn nên liếc qua sheet vào thứ Hai đầu tiên nó báo `DONE`.
 - Xoá dữ liệu remote browser định kỳ: **Settings → Gemini Spark Settings → Delete remote browser data**.

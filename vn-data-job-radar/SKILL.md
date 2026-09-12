@@ -14,11 +14,11 @@ Tìm các tin tuyển dụng ngành dữ liệu **đăng trong 72 giờ gần nh
 | Tham số | Giá trị hợp lệ         | Mặc định  | Ghi chú                                                                                                                             |
 | -------- | -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `city` | `Hà Nội` \| `TP.HCM` | `Hà Nội` | Nếu user không chỉ định, dùng mặc định và **ghi rõ trong mở đầu email** là đang dùng thành phố mặc định |
-| `mode` | `full` \| `quick` | `full` | `full` = quét đủ Gmail + 5 nguồn web + career page. `quick` = chỉ Gmail + Xóm Jobs + LinkedIn, bỏ career page. Dùng `quick` cho lần chạy buổi chiều |
+| `mode` | `full` \| `quick` \| `cleanup` | `full` | `full` = quét đủ Gmail + 5 nguồn web + career page. `quick` = chỉ Gmail + Xóm Jobs + LinkedIn, bỏ career page — dùng cho buổi chiều. `cleanup` = **không quét gì**, chỉ dọn dẹp sheet và gửi email báo cáo riêng — xem mục "Chế độ cleanup" |
 
 Không hỏi lại user khi thiếu tham số — skill chạy tự động, không có ai trả lời.
 
-Lọc trùng ở cả hai mode đều dựa vào `seen_urls`. **Không** lọc theo "tin đăng kể từ lần
+Lọc trùng ở mode `full` và `quick` đều dựa vào `seen_urls`. **Không** lọc theo "tin đăng kể từ lần
 chạy trước" — chỉ cần URL chưa có trong SEEN là gửi.
 
 ## Định dạng dữ liệu chuẩn
@@ -43,7 +43,7 @@ vì nó quyết định hiệu năng của mọi lần chạy.
 | Tab             | Cột       | Vai trò                                                                                                                            |
 | --------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `seen_urls`   | A: job_url | **CHỈ ĐỌC + append.** Tab duy nhất được đọc trong lần chạy thường                                                |
-| `jobs_detail` | A–H       | **CHỈ GHI** trong lần chạy thường. **Ngoại lệ duy nhất:** Bước 7b (dọn dẹp thứ Hai) được đọc tab này |
+| `jobs_detail` | A–H       | **CHỈ GHI** ở mode `full`/`quick`. **Chỉ mode `cleanup`** được đọc tab này |
 | `archive`     | A–H       | **CHỈ GHI.** Không bao giờ đọc, không bao giờ xoá                                                                     |
 
 Header của `jobs_detail` và `archive`:
@@ -230,34 +230,54 @@ Với mỗi job mới:
 
 Ghi trước, gửi sau. Nếu email lỗi thì lần chạy tới cũng không gửi trùng.
 
-## Bước 7b — Dọn dẹp hàng tuần
+## Chế độ `cleanup` — Dọn dẹp hàng tuần (task riêng)
 
-**Điều kiện chạy — phải thoả cả 3:**
-1. Giờ hiện tại theo Asia/Ho_Chi_Minh là **thứ Hai và trước 12:00**
-2. `mode = full`
-3. `city = Hà Nội` — chỉ một task được dọn dẹp mỗi tuần, để hai task Hà Nội / TP.HCM
-   không cùng sửa sheet một lúc. Task TP.HCM **luôn bỏ qua** bước này.
+Khi `mode = cleanup`, **bỏ qua toàn bộ Bước 1–8**. Không đọc Gmail, không quét web,
+không ghi `seen_urls`/`jobs_detail`. Chỉ làm đúng mục này rồi gửi một email báo cáo riêng.
 
-Không thoả bất kỳ điều kiện nào → bỏ qua hoàn toàn bước này, đi tiếp Bước 8.
+Task này được schedule riêng (sáng thứ Hai, trước giờ chạy của các task quét) nên
+không cần tự kiểm tra ngày. Nếu được gọi bất kỳ lúc nào khác, vẫn chạy bình thường.
 
-Đây là bước duy nhất được phép **đọc** tab `jobs_detail`, và là thao tác **không hoàn tác
-được** trên sheet. Vì vậy phải qua đủ các guard dưới đây.
+Đây là chế độ duy nhất được phép **đọc** tab `jobs_detail`, và là thao tác **không hoàn
+tác được** trên sheet. Vì vậy phải qua đủ các guard dưới đây.
 
-1. Đọc `jobs_detail`, parse cột `first_sent_at` theo ISO 8601.
-   - Dòng nào không parse được → **bỏ qua dòng đó**, không đụng vào, ghi số dòng lỗi vào báo cáo
-2. Tính `CUTOFF = now − 90 ngày`. Chọn các dòng có `first_sent_at < CUTOFF` → tập `OLD`
-3. **Guard an toàn — kiểm tra trước khi xoá bất kỳ thứ gì:**
-   - Nếu `OLD` rỗng → kết thúc bước, không làm gì
-   - Nếu `|OLD| > 30%` tổng số dòng `jobs_detail` → **DỪNG bước 7b**, không xoá gì,
-     ghi vào email: "Dọn dẹp bị hoãn: {|OLD|}/{tổng} dòng vượt ngưỡng 30%, cần user kiểm tra thủ công"
-   - Nếu tổng số dòng `jobs_detail` < 50 → **DỪNG**, chưa cần dọn
-4. Thứ tự thao tác (phải đúng thứ tự này để lỗi giữa chừng không mất dữ liệu):
+### Các bước
+
+1. Đếm số dòng hiện có: `DETAIL_BEFORE` (jobs_detail), `SEEN_BEFORE` (seen_urls)
+2. Đọc `jobs_detail`, parse cột `first_sent_at` theo ISO 8601.
+   - Dòng nào không parse được → **bỏ qua dòng đó**, không đụng vào, đếm vào `BAD_ROWS`
+3. Tính `CUTOFF = now − 90 ngày`. Chọn các dòng có `first_sent_at < CUTOFF` → tập `OLD`
+4. **Guard an toàn — kiểm tra trước khi xoá bất kỳ thứ gì:**
+   - Nếu `DETAIL_BEFORE < 50` → kết quả `SKIPPED`, lý do "chưa đủ dữ liệu để dọn"
+   - Nếu `OLD` rỗng → kết quả `SKIPPED`, lý do "không có dòng nào quá 90 ngày"
+   - Nếu `|OLD| > 30%` × `DETAIL_BEFORE` → kết quả `BLOCKED`, không xoá gì,
+     lý do "{|OLD|}/{DETAIL_BEFORE} dòng vượt ngưỡng 30%, cần user kiểm tra thủ công"
+5. Thứ tự thao tác (phải đúng thứ tự này để lỗi giữa chừng không mất dữ liệu):
    1. Append toàn bộ `OLD` vào `archive` **trước**
-   2. Xác nhận số dòng đã append vào `archive` bằng `|OLD|` — nếu không khớp → DỪNG, không xoá
+   2. Xác nhận số dòng đã append vào `archive` bằng `|OLD|` — nếu không khớp → kết quả `FAILED`,
+      không xoá gì, ghi rõ số dòng đã append
    3. Xoá các dòng `OLD` khỏi `jobs_detail`
    4. Xoá các URL tương ứng khỏi `seen_urls` (**chỉ xoá URL có trong `OLD`**, khớp chuỗi chính xác)
-5. **KHÔNG bao giờ xoá dữ liệu khỏi `archive`**
-6. Ghi vào cuối email: "Dọn dẹp thứ Hai: đã archive {N} dòng, seen_urls còn {M} URL"
+   5. Kết quả `DONE`
+6. **KHÔNG bao giờ xoá dữ liệu khỏi `archive`**
+7. Đếm lại `DETAIL_AFTER`, `SEEN_AFTER`, `ARCHIVE_TOTAL`
+
+### Email báo cáo cleanup
+
+**Tiêu đề:** `[Job Radar] Dọn dẹp tuần — {DONE|SKIPPED|BLOCKED|FAILED} — {dd/MM}`
+
+**Thân email** (HTML, ngắn, không có bảng job):
+
+- Kết quả: `DONE` / `SKIPPED` / `BLOCKED` / `FAILED` + lý do (nếu không phải `DONE`)
+- Đã archive: `{|OLD|}` dòng (0 nếu không dọn)
+- `jobs_detail`: `{DETAIL_BEFORE}` → `{DETAIL_AFTER}` dòng
+- `seen_urls`: `{SEEN_BEFORE}` → `{SEEN_AFTER}` URL
+- `archive`: tổng `{ARCHIVE_TOTAL}` dòng
+- Dòng lỗi định dạng ngày bị bỏ qua: `{BAD_ROWS}` (chỉ ghi nếu > 0)
+- Dòng cũ nhất còn lại trong `jobs_detail`: `{first_sent_at nhỏ nhất}`
+
+**Luôn gửi email**, kể cả `SKIPPED` — để user biết task còn sống. Với `BLOCKED` và `FAILED`,
+mở đầu email bằng một câu nói rõ cần user vào sheet kiểm tra.
 
 Việc này giữ `seen_urls` ổn định ở mức vài nghìn dòng thay vì phình vô hạn,
 nên mỗi lần đọc ở Bước 1 luôn nhanh.
@@ -297,7 +317,6 @@ Mỗi section là một bảng:
 - Nguồn nào KHÔNG truy cập được lần này (captcha, lỗi, tường đăng nhập)
 - Career page nào lỗi hoặc đổi cấu trúc
 - `SEEN_COUNT`: số URL đã đọc được từ `seen_urls` ở Bước 1
-- Kết quả Bước 7b nếu hôm nay là thứ Hai
 
 Dòng `SEEN_COUNT` là để user tự kiểm tra bộ nhớ chống trùng còn sống. Nếu con số này
 đột nhiên về 0 trong khi trước đó vẫn lớn, tức là có lỗi.
