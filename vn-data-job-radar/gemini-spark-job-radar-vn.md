@@ -2,19 +2,50 @@
 
 **Phiên bản 3.1** — cấu trúc Sheet 3 tab, Gmail Job Alerts làm nguồn chính, remote browser, task dọn dẹp tách riêng, kèm hướng dẫn setup từng bước.
 
-Thời gian setup: khoảng 60 phút, trong đó 15 phút là chờ test.
+Thời gian setup: **2 ngày**, tổng khoảng 60 phút thao tác.
+Ngày 1 (~45 phút): Bước 1 → 3b.2. Ngày 2 (~15 phút + 25 phút chờ test): Bước 3b.3 → 9, sau khi email alert đầu tiên đã về.
 
+- [Tổng quan hệ thống](#tổng-quan-hệ-thống)
 - [Phần 0 — Setup từng bước](#phần-0--setup-từng-bước) ← bắt đầu ở đây
-- [Phần 1 — Nội dung Skill](#phần-1--nội-dung-skill)
+- [Phần 1 — Luồng chạy của Skill](#phần-1--luồng-chạy-của-skill)
 - [Phần 2 — Nội dung Task](#phần-2--nội-dung-task)
-- [Phần 3 — Phương án 10 task](#phần-3--phương-án-10-task)
-- [Phần 4 — Xử lý sự cố](#phần-4--xử-lý-sự-cố)
+- [Phần 3 — Email nhận được trông thế nào](#phần-3--email-nhận-được-trông-thế-nào)
+- [Phần 4 — Phương án 10 task](#phần-4--phương-án-10-task)
+- [Phần 5 — Xử lý sự cố](#phần-5--xử-lý-sự-cố)
 
 **Nguyên tắc thiết kế của bản này:**
 
 - Task chạy tự động lúc bạn không mở máy → **dùng remote browser**, không phụ thuộc Chrome local.
 - Remote browser bị LinkedIn/TopCV chặn → **Gmail Job Alerts là nguồn chính**, web chỉ bổ sung.
 - Chống trùng bằng Google Sheet, không bằng trí nhớ của agent.
+- Dọn dẹp sheet là **task riêng**, không nhét vào task quét.
+
+---
+
+# Tổng quan hệ thống
+
+Sau khi setup xong, bạn sẽ có đúng những thứ sau:
+
+| Thành phần | Số lượng | Tên / giá trị | Tạo ở bước |
+|---|---|---|---|
+| Google Sheet | 1 file, 3 tab | `Job Radar Tracker` → `seen_urls`, `jobs_detail`, `archive` | 3 |
+| Gmail label | 5 | `ITViec Job Alerts`, `LinkedIn Job Alerts`, `VietnamWorks Job Alert`, `TopCV`, `Xom Job Alerts` | 3b |
+| Gmail filter | 5 | Mỗi filter gắn 1 label theo người gửi | 3b |
+| Spark Skill | 1 | `vn-data-job-radar` (từ file `SKILL.md`) | 4 |
+| Spark Task | 3 | Hà Nội · TP.HCM · Dọn dẹp | 5, 8, 8b |
+| Schedule | 5 | HN 08:00 full / 17:30 quick · HCM 08:20 full / 17:50 quick · Dọn dẹp T2 07:00 | 9 |
+
+Email bạn nhận mỗi ngày: **4 email** (2 thành phố × sáng/chiều). Thứ Hai thêm **1 email dọn dẹp**.
+
+Luồng dữ liệu:
+
+```
+Gmail alert (5 label) ─┐
+Web (5 trang)          ├─► lọc / gộp trùng ─► so với seen_urls ─► ghi sheet ─► email
+Career page (16 cty)  ─┘                              ▲                 │
+                                                       │                 ▼
+                                             seen_urls ◄──── jobs_detail ──(>90 ngày, T2)──► archive
+```
 
 ---
 
@@ -127,7 +158,9 @@ Xom Job Alerts
 
 ### 3b.3 Tạo filter tự gắn label
 
-Chờ nhận được email alert đầu tiên từ mỗi trang (thường trong 24h). Với mỗi email:
+**Làm vào ngày hôm sau.** Phải chờ nhận được email alert đầu tiên từ mỗi trang (thường trong 24h) thì Gmail mới có mẫu để tạo filter. Trong lúc chờ có thể làm tiếp Bước 4 (tạo Skill), nhưng **đừng chạy test ở Bước 6** trước khi label có email — kết quả test sẽ mỏng và bạn không phân biệt được lỗi thật với lỗi do chưa có alert.
+
+Với mỗi email:
 
 1. Mở email → menu ⋮ → **Filter messages like this**
 2. Gmail tự điền địa chỉ người gửi vào ô *From*. Nếu tiêu đề email có mẫu cố định (ví dụ "việc làm mới cho bạn"), thêm vào ô *Subject* để lọc chính xác hơn
@@ -182,7 +215,7 @@ Trong lúc chờ, mở **work panel** (bấm chip tiến độ ở đầu thread
 4. ☑ Cuối email có dòng `SEEN_COUNT` (lần đầu = 0 là đúng) và dòng "nguồn không truy cập được"
 5. ☑ Mở đầu email **không** ghi "đang dùng thành phố mặc định" (nếu có → Task chưa truyền `city` đúng)
 
-Nếu thiếu mục nào, xem [Phần 4](#phần-4--xử-lý-sự-cố).
+Nếu thiếu mục nào, xem [Phần 5](#phần-5--xử-lý-sự-cố). Mẫu email đúng ở [Phần 3](#phần-3--email-nhận-được-trông-thế-nào).
 
 ## Bước 7 — Test lần 2: kiểm tra chống trùng (BƯỚC QUAN TRỌNG NHẤT)
 
@@ -223,7 +256,7 @@ Lặp lại Bước 5 với instruction **Task 2 (TP.HCM)**. Chạy tay 1 lần 
 
 Lặp lại Bước 5 với instruction **Task 3 (Dọn dẹp)**. Chạy tay 1 lần.
 
-**Kết quả đúng:** một email riêng, tiêu đề `[Job Radar] Dọn dẹp tuần — SKIPPED — {dd/MM}` với lý do "chưa đủ dữ liệu để dọn" (vì `jobs_detail` mới có vài chục dòng). Sheet **không thay đổi gì**.
+**Kết quả đúng:** một email riêng (mẫu ở Phần 3), tiêu đề `[Job Radar] Dọn dẹp tuần — SKIPPED — {dd/MM}` với lý do "chưa đủ dữ liệu để dọn" (vì `jobs_detail` mới có vài chục dòng). Sheet **không thay đổi gì**.
 
 **Kết quả sai:** nó bắt đầu quét web hoặc đọc Gmail → nhắn: *"mode: cleanup không quét gì cả, chỉ làm mục 'Chế độ cleanup' trong skill."* Hoặc nó xoá dòng trong sheet dù chưa đủ 50 dòng → nhắn: *"Guard đầu tiên: jobs_detail dưới 50 dòng thì SKIPPED, không được xoá."*
 
@@ -281,11 +314,11 @@ Nhưng đừng xoá `archive`. Sau vài tháng đó là dataset dọc về thị
 
 ---
 
-# Phần 1 — Nội dung Skill
+# Phần 1 — Luồng chạy của Skill
 
 Nội dung skill nằm trong file **`SKILL.md`** cùng thư mục. Không chép lại ở đây.
 
-Tóm tắt luồng để bạn đối chiếu khi đọc work panel:
+Tóm tắt luồng để bạn đối chiếu khi đọc work panel. Task quét (`mode: full` / `quick`) đi từ Bước 1 → 8. Task dọn dẹp (`mode: cleanup`) **bỏ qua toàn bộ** 8 bước đó, chỉ làm mục cuối bảng.
 
 | Bước trong skill | Việc làm                                                                                                                       |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -296,8 +329,8 @@ Tóm tắt luồng để bạn đối chiếu khi đọc work panel:
 | 5                  | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                           |
 | 6                  | Chuẩn hoá URL                                                                                                                  |
 | 7                  | Ghi`seen_urls` + `jobs_detail`                                                                                               |
-| `cleanup` (task riêng) | Sáng thứ Hai 07:00: archive dòng >90 ngày (guard 30%), gửi email báo cáo riêng, không quét gì |
 | 8                  | Gửi email HTML                                                                                                                  |
+| **`cleanup`** | Task riêng, T2 07:00: đọc `jobs_detail`, archive dòng >90 ngày (guard: ≥50 dòng, ≤30%), xoá URL tương ứng khỏi `seen_urls`, gửi email báo cáo riêng |
 
 ---
 
@@ -341,6 +374,8 @@ Làm đúng theo skill, đặc biệt:
 Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
 ```
 
+> Giá trị `city` trong Task 1 và 2 phải là đúng `Hà Nội` hoặc `TP.HCM` — đây là chuỗi skill ghi vào cột `city` của sheet. Đừng viết "TP. Hồ Chí Minh" hay "HCM". Task 3 không có `city`.
+
 ## Task 3 — Dọn dẹp hàng tuần
 
 ```
@@ -359,8 +394,6 @@ trong skill — nếu không thoả guard thì không xoá gì và báo SKIPPED 
 Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
 ```
 
-> Giá trị `city` phải là đúng `Hà Nội` hoặc `TP.HCM` — đây là chuỗi skill ghi vào cột `city` của sheet. Đừng viết "TP. Hồ Chí Minh" hay "HCM".
-
 ## Bảng lịch
 
 | Task     | Sáng (`mode: full`) | Chiều (`mode: quick`) | Thứ Hai (`mode: cleanup`) |
@@ -371,7 +404,67 @@ Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
 
 ---
 
-# Phần 3 — Phương án 10 task
+# Phần 3 — Email nhận được trông thế nào
+
+Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
+
+## Email quét (Task Hà Nội / TP.HCM)
+
+**Tiêu đề:** `[Job Radar] Hà Nội — 12 tin mới — 15/09 08:14`
+
+> Sáng nay có 12 tin mới, nhiều nhất là Data Engineer (5 tin). Đáng chú ý: Techcombank mở cùng lúc 3 vị trí Data Platform, stack Spark + Airflow.
+>
+> **Data Analyst**
+>
+> | ⭐ | Vị trí | Công ty | Lương | YOE | Stack chính | Ngày đăng | Link |
+> |---|---|---|---|---|---|---|---|
+> | ⭐ | Senior Data Analyst | MoMo | Thoả thuận | 3 | SQL, Python, Looker, BigQuery | 2026-09-14 | Xem tin |
+> | | Product Analyst | Base.vn | 20–28 triệu | 2 | SQL, Metabase, Excel | 2026-09-13 | Xem tin |
+>
+> **Data Engineer**
+>
+> *(bảng tương tự)*
+>
+> **Business Analyst**
+>
+> | ⭐ | Vị trí | Công ty | ... |
+> | | Business Analyst (BA thiên data) | VNPAY | ... |
+> | | IT Business Analyst (IT BA thuần) | FPT IS | ... |
+>
+> ---
+> - Nguồn không truy cập được: LinkedIn (tường đăng nhập), TopCV (captcha)
+> - Career page lỗi: VinSmart Future (timeout)
+> - SEEN_COUNT: 1.847
+
+Những gì **không** xuất hiện: section không có tin (bỏ hẳn), URL trần, lương suy đoán.
+
+**Khi không có tin mới:** tiêu đề `[Job Radar] Hà Nội — không có tin mới`, thân email 1 dòng + `SEEN_COUNT`.
+
+## Email dọn dẹp (Task 3, thứ Hai)
+
+**Tiêu đề:** `[Job Radar] Dọn dẹp tuần — DONE — 15/12`
+
+> Kết quả: **DONE**
+> Đã archive: 213 dòng
+> jobs_detail: 1.847 → 1.634 dòng
+> seen_urls: 1.847 → 1.634 URL
+> archive: tổng 213 dòng
+> Dòng cũ nhất còn lại trong jobs_detail: 2026-09-16
+
+Bốn trạng thái có thể gặp:
+
+| Tiêu đề | Khi nào | Bạn cần làm gì |
+|---|---|---|
+| `SKIPPED` | `jobs_detail` < 50 dòng, hoặc không dòng nào quá 90 ngày. **~3 tháng đầu sẽ toàn thế này** | Không |
+| `DONE` | Dọn thành công | Lần đầu thấy DONE thì mở sheet liếc qua cho chắc |
+| `BLOCKED` | Số dòng cần dọn > 30% tổng — thường là lần đầu có dữ liệu đủ 90 ngày | Tự cut dòng cũ sang `archive` bằng tay một lần (Phần 5) |
+| `FAILED` | Append vào `archive` xong nhưng đếm không khớp → dừng trước khi xoá | Xoá dòng vừa append trong `archive`, chạy lại (Phần 5). Không mất dữ liệu |
+
+Email dọn dẹp **luôn gửi**, kể cả `SKIPPED`, để bạn biết task còn sống.
+
+---
+
+# Phần 4 — Phương án 10 task
 
 Chọn phương án này nếu muốn mỗi title một email riêng để lọc và lưu trữ độc lập.
 
@@ -391,7 +484,6 @@ Chỉ theo dõi nhóm vị trí {NHÓM VỊ TRÍ} — bỏ qua hoàn toàn 4 nh�
 Tiêu đề email: [Job Radar] {NHÓM VỊ TRÍ} — {THÀNH PHỐ} — {N} tin mới — {dd/MM HH:mm}
 Vì chỉ một nhóm vị trí, thay cấu trúc 5 section bằng một bảng duy nhất,
 sắp xếp theo mức lương giảm dần (tin "Thoả thuận" và "không rõ" xếp cuối).
-
 ```
 
 Dọn dẹp vẫn dùng **Task 3** riêng như Phần 2, lịch thứ Hai 07:00. Không nhét dọn dẹp vào 10 task quét.
@@ -415,7 +507,7 @@ Cả 10 task dùng **chung một** Google Sheet `Job Radar Tracker`. Không tạ
 
 ---
 
-# Phần 4 — Xử lý sự cố
+# Phần 5 — Xử lý sự cố
 
 ## Spark hỏi xác nhận mỗi lần gửi email
 
