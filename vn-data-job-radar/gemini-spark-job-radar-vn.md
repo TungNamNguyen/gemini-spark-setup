@@ -26,14 +26,14 @@ Ngày 1 (~45 phút): Bước 1 → 3b.2. Ngày 2 (~15 phút + 25 phút chờ tes
 
 Sau khi setup xong, bạn sẽ có đúng những thứ sau:
 
-| Thành phần | Số lượng | Tên / giá trị | Tạo ở bước |
-|---|---|---|---|
-| Google Sheet | 1 file, 3 tab | `Job Radar Tracker` → `seen_urls`, `jobs_detail`, `archive` | 3 |
-| Gmail label | 5 | `ITViec Job Alerts`, `LinkedIn Job Alerts`, `VietnamWorks Job Alert`, `TopCV`, `Xom Job Alerts` | 3b |
-| Gmail filter | 5 | Mỗi filter gắn 1 label theo người gửi | 3b |
-| Spark Skill | 1 | `vn-data-job-radar` (từ file `SKILL.md`) | 4 |
-| Spark Task | 3 | Hà Nội · TP.HCM · Dọn dẹp | 5, 8, 8b |
-| Schedule | 5 | HN 08:00 full / 17:30 quick · HCM 08:20 full / 17:50 quick · Dọn dẹp T2 07:00 | 9 |
+| Thành phần | Số lượng   | Tên / giá trị                                                                                          | Tạo ở bước |
+| ------------ | ------------- | --------------------------------------------------------------------------------------------------------- | -------------- |
+| Google Sheet | 1 file, 3 tab | `Job Radar Tracker` → `seen_urls`, `jobs_detail`, `archive`                                      | 3              |
+| Gmail label  | 5             | `ITViec Job Alerts`, `LinkedIn Job Alerts`, `VietnamWorks Job Alert`, `TopCV`, `Xom Job Alerts` | 3b             |
+| Gmail filter | 5             | Mỗi filter gắn 1 label theo người gửi                                                                | 3b             |
+| Spark Skill  | 1             | `vn-data-job-radar` (từ file `SKILL.md`)                                                             | 4              |
+| Spark Task   | 3             | Hà Nội · TP.HCM · Dọn dẹp                                                                           | 5, 8, 8b       |
+| Schedule     | 5             | HN 08:00 full / 17:30 quick · HCM 08:20 full / 17:50 quick · Dọn dẹp T2 07:00                         | 9              |
 
 Email bạn nhận mỗi ngày: **4 email** (2 thành phố × sáng/chiều). Thứ Hai thêm **1 email dọn dẹp**.
 
@@ -60,7 +60,7 @@ Cần đủ cả 4 điều kiện:
 | Gói Google AI**Pro** hoặc **Ultra** | gemini.google.com → avatar góc phải → xem gói hiện tại |
 | Tài khoản Google**cá nhân**             | Không dùng được tài khoản công ty/trường học       |
 | Trên 18 tuổi                                    | Theo thông tin tài khoản Google                            |
-| Bật **Keep Activity**                     | myactivity.google.com/product/gemini                          |
+| Bật**Keep Activity**                       | myactivity.google.com/product/gemini                          |
 
 Sau đó vào **gemini.google.com → Menu (góc trái) → tìm mục "Spark"**.
 
@@ -303,7 +303,7 @@ Lệch 20 phút giữa hai task quét để không chạy chồng nhau — task 
 | Quá nhiều tin rác                                              | Bộ lọc lỏng                                         | Nhắn:`Loại hết tin từ công ty outsourcing và headhunt, chỉ giữ product company, ngân hàng, fintech` |
 | Quá ít tin                                                      | Alert Gmail chưa về hoặc filter chưa gắn label    | Xem Bước 3b.4                                                                                                 |
 | Toàn tin senior                                                  | Chưa lọc YOE                                         | Nhắn:`Chỉ giữ tin yêu cầu dưới 3 năm kinh nghiệm`                                                    |
-| Thứ Hai không có email dọn dẹp | Task 3 chưa có lịch hoặc bị pause | Work panel → Schedules của Task 3 |
+| Thứ Hai không có email dọn dẹp                               | Task 3 chưa có lịch hoặc bị pause                 | Work panel → Schedules của Task 3                                                                             |
 | Cùng 1 tin hiện 2–3 dòng                                      | Gộp theo`company\|title` chưa chạy                 | Nhắn:`Gộp các tin cùng công ty và cùng tiêu đề thành 1 dòng theo Bước 5 của skill`             |
 
 ## Bước 11 — Sau 1 tháng (tuỳ chọn)
@@ -320,17 +320,17 @@ Nội dung skill nằm trong file **`SKILL.md`** cùng thư mục. Không chép 
 
 Tóm tắt luồng để bạn đối chiếu khi đọc work panel. Task quét (`mode: full` / `quick`) đi từ Bước 1 → 8. Task dọn dẹp (`mode: cleanup`) **bỏ qua toàn bộ** 8 bước đó, chỉ làm mục cuối bảng.
 
-| Bước trong skill | Việc làm                                                                                                                       |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| 1                  | Đọc`seen_urls` cột A → SEEN, đếm `SEEN_COUNT`                                                                          |
-| 2                  | Đọc 5 Gmail label, trích URL job                                                                                              |
-| 3                  | Quét web: Xóm Jobs → LinkedIn → TopCV → ITviec → VietnamWorks → 16 career page (mode`quick`: chỉ Xóm Jobs + LinkedIn) |
-| 4                  | Từ khoá 5 nhóm vị trí                                                                                                       |
-| 5                  | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                           |
-| 6                  | Chuẩn hoá URL                                                                                                                  |
-| 7                  | Ghi`seen_urls` + `jobs_detail`                                                                                               |
-| 8                  | Gửi email HTML                                                                                                                  |
-| **`cleanup`** | Task riêng, T2 07:00: đọc `jobs_detail`, archive dòng >90 ngày (guard: ≥50 dòng, ≤30%), xoá URL tương ứng khỏi `seen_urls`, gửi email báo cáo riêng |
+| Bước trong skill    | Việc làm                                                                                                                                                              |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1                     | Đọc`seen_urls` cột A → SEEN, đếm `SEEN_COUNT`                                                                                                                 |
+| 2                     | Đọc 5 Gmail label, trích URL job                                                                                                                                     |
+| 3                     | Quét web: Xóm Jobs → LinkedIn → TopCV → ITviec → VietnamWorks → 16 career page (mode`quick`: chỉ Xóm Jobs + LinkedIn)                                        |
+| 4                     | Từ khoá 5 nhóm vị trí                                                                                                                                              |
+| 5                     | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                                                                  |
+| 6                     | Chuẩn hoá URL                                                                                                                                                         |
+| 7                     | Ghi`seen_urls` + `jobs_detail`                                                                                                                                      |
+| 8                     | Gửi email HTML                                                                                                                                                         |
+| **`cleanup`** | Task riêng, T2 07:00: đọc`jobs_detail`, archive dòng >90 ngày (guard: ≥50 dòng, ≤30%), xoá URL tương ứng khỏi `seen_urls`, gửi email báo cáo riêng |
 
 ---
 
@@ -396,11 +396,11 @@ Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
 
 ## Bảng lịch
 
-| Task     | Sáng (`mode: full`) | Chiều (`mode: quick`) | Thứ Hai (`mode: cleanup`) |
-| -------- | ---------------------- | ------------------------ | --- |
-| Hà Nội | 08:00                  | 17:30                    | — |
-| TP.HCM   | 08:20                  | 17:50                    | — |
-| Dọn dẹp | — | — | 07:00 |
+| Task      | Sáng (`mode: full`) | Chiều (`mode: quick`) | Thứ Hai (`mode: cleanup`) |
+| --------- | ---------------------- | ------------------------ | ---------------------------- |
+| Hà Nội  | 08:00                  | 17:30                    | —                           |
+| TP.HCM    | 08:20                  | 17:50                    | —                           |
+| Dọn dẹp | —                     | —                       | 07:00                        |
 
 ---
 
@@ -416,10 +416,10 @@ Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
 >
 > **Data Analyst**
 >
-> | ⭐ | Vị trí | Công ty | Lương | YOE | Stack chính | Ngày đăng | Link |
-> |---|---|---|---|---|---|---|---|
-> | ⭐ | Senior Data Analyst | MoMo | Thoả thuận | 3 | SQL, Python, Looker, BigQuery | 2026-09-14 | Xem tin |
-> | | Product Analyst | Base.vn | 20–28 triệu | 2 | SQL, Metabase, Excel | 2026-09-13 | Xem tin |
+> | ⭐ | Vị trí            | Công ty | Lương       | YOE | Stack chính                  | Ngày đăng | Link    |
+> | -- | ------------------- | -------- | ------------- | --- | ----------------------------- | ------------ | ------- |
+> | ⭐ | Senior Data Analyst | MoMo     | Thoả thuận  | 3   | SQL, Python, Looker, BigQuery | 2026-09-14   | Xem tin |
+> |    | Product Analyst     | Base.vn  | 20–28 triệu | 2   | SQL, Metabase, Excel          | 2026-09-13   | Xem tin |
 >
 > **Data Engineer**
 >
@@ -432,6 +432,7 @@ Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
 > | | IT Business Analyst (IT BA thuần) | FPT IS | ... |
 >
 > ---
+>
 > - Nguồn không truy cập được: LinkedIn (tường đăng nhập), TopCV (captcha)
 > - Career page lỗi: VinSmart Future (timeout)
 > - SEEN_COUNT: 1.847
@@ -453,12 +454,12 @@ Những gì **không** xuất hiện: section không có tin (bỏ hẳn), URL t
 
 Bốn trạng thái có thể gặp:
 
-| Tiêu đề | Khi nào | Bạn cần làm gì |
-|---|---|---|
-| `SKIPPED` | `jobs_detail` < 50 dòng, hoặc không dòng nào quá 90 ngày. **~3 tháng đầu sẽ toàn thế này** | Không |
-| `DONE` | Dọn thành công | Lần đầu thấy DONE thì mở sheet liếc qua cho chắc |
-| `BLOCKED` | Số dòng cần dọn > 30% tổng — thường là lần đầu có dữ liệu đủ 90 ngày | Tự cut dòng cũ sang `archive` bằng tay một lần (Phần 5) |
-| `FAILED` | Append vào `archive` xong nhưng đếm không khớp → dừng trước khi xoá | Xoá dòng vừa append trong `archive`, chạy lại (Phần 5). Không mất dữ liệu |
+| Tiêu đề  | Khi nào                                                                                                         | Bạn cần làm gì                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `SKIPPED` | `jobs_detail` < 50 dòng, hoặc không dòng nào quá 90 ngày. **~3 tháng đầu sẽ toàn thế này** | Không                                                                               |
+| `DONE`    | Dọn thành công                                                                                                | Lần đầu thấy DONE thì mở sheet liếc qua cho chắc                             |
+| `BLOCKED` | Số dòng cần dọn > 30% tổng — thường là lần đầu có dữ liệu đủ 90 ngày                           | Tự cut dòng cũ sang`archive` bằng tay một lần (Phần 5)                      |
+| `FAILED`  | Append vào`archive` xong nhưng đếm không khớp → dừng trước khi xoá                                  | Xoá dòng vừa append trong`archive`, chạy lại (Phần 5). Không mất dữ liệu |
 
 Email dọn dẹp **luôn gửi**, kể cả `SKIPPED`, để bạn biết task còn sống.
 
