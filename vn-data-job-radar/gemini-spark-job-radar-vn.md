@@ -42,7 +42,7 @@ Luồng dữ liệu:
 ```
 Gmail alert (5 label) ─┐
 Web (5 trang)          ├─► lọc / gộp trùng ─► so với seen_urls ─► ghi sheet ─► email
-Career page (16 cty)  ─┘                              ▲                 │
+Career page (ưu tiên) ─┘                              ▲                 │
                                                        │                 ▼
                                              seen_urls ◄──── jobs_detail ──(>90 ngày, T2)──► archive
 ```
@@ -108,19 +108,21 @@ Job Radar Tracker
 Tab này Spark **chỉ ghi** trong task quét. Chỉ task dọn dẹp (`mode: cleanup`, sáng thứ Hai) mới đọc.
 
 1. Tạo tab mới, đặt tên `jobs_detail`
-2. Dòng 1 điền đúng 8 cột này:
+2. Dòng 1 điền đúng 9 cột này:
 
-| A       | B     | C       | D    | E          | F           | G      | H             |
-| ------- | ----- | ------- | ---- | ---------- | ----------- | ------ | ------------- |
-| job_url | title | company | city | role_group | posted_date | source | first_sent_at |
+| A       | B     | C       | D    | E          | F           | G      | H             | I          |
+| ------- | ----- | ------- | ---- | ---------- | ----------- | ------ | ------------- | ---------- |
+| job_url | title | company | city | role_group | posted_date | source | first_sent_at | alias_urls |
 
-3. Xoá cột I trở đi
+3. Xoá cột J trở đi
+
+> Cột `alias_urls` chứa các URL trùng của cùng một tin (cùng JD đăng trên nhiều trang). Task dọn dẹp cần nó để xoá sạch cả nhóm URL khỏi `seen_urls`, nếu không `seen_urls` sẽ phình mãi. Thường rỗng.
 
 ### 3.4 Tab 3: `archive`
 
 1. Tạo tab mới, đặt tên `archive`
-2. Copy nguyên dòng header của `jobs_detail` sang dòng 1
-3. Xoá cột I trở đi
+2. Copy nguyên dòng header của `jobs_detail` sang dòng 1 (đủ 9 cột)
+3. Xoá cột J trở đi
 
 ### 3.5 Kiểm tra
 
@@ -210,7 +212,7 @@ Trong lúc chờ, mở **work panel** (bấm chip tiến độ ở đầu thread
 **Sau khi xong, kiểm tra 5 thứ:**
 
 1. ☑ Tab `seen_urls` có URL mới, **không có URL nào chứa `?utm`, `?ref=`, `trackingId`**
-2. ☑ Tab `jobs_detail` có dòng đầy đủ 8 cột; cột `first_sent_at` dạng `2026-09-12T09:03:00+07:00`; cột `role_group` chỉ có `DA/AE/DE/BI/BA`
+2. ☑ Tab `jobs_detail` có dòng đầy đủ 9 cột (cột I `alias_urls` thường rỗng); cột `first_sent_at` dạng `2026-09-12T09:03:00+07:00`; cột `role_group` chỉ có `DA/AE/DE/BI/BA`
 3. ☑ Email đã về, link bấm được, công ty ưu tiên có ⭐
 4. ☑ Cuối email có dòng `SEEN_COUNT` (lần đầu = 0 là đúng) và dòng "nguồn không truy cập được"
 5. ☑ Mở đầu email **không** ghi "đang dùng thành phố mặc định" (nếu có → Task chưa truyền `city` đúng)
@@ -282,7 +284,7 @@ Tạo lịch: mỗi ngày lúc 17:30 giờ Việt Nam, chạy với mode: quick.
 Tạo lịch: mỗi thứ Hai lúc 07:00 giờ Việt Nam, chạy với mode: cleanup.
 ```
 
-Lệch 20 phút giữa hai task quét để không chạy chồng nhau — task `full` sáng có thể mất hơn 15 phút vì quét 16 career page. Task dọn dẹp chạy **07:00, trước cả hai task quét** một tiếng, để không có task nào đọc/ghi sheet trong lúc nó xoá dòng.
+Lệch 20 phút giữa hai task quét để không chạy chồng nhau — task `full` sáng có thể mất hơn 15 phút vì quét toàn bộ career page ưu tiên. Task dọn dẹp chạy **07:00, trước cả hai task quét** một tiếng, để không có task nào đọc/ghi sheet trong lúc nó xoá dòng.
 
 > Vì dùng remote browser nên không cần máy bật đúng giờ — chọn giờ nào cũng được. 08:00 để email có trước giờ làm.
 
@@ -324,13 +326,13 @@ Tóm tắt luồng để bạn đối chiếu khi đọc work panel. Task quét 
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1                     | Đọc`seen_urls` cột A → SEEN, đếm `SEEN_COUNT`                                                                                                                 |
 | 2                     | Đọc 5 Gmail label, trích URL job                                                                                                                                     |
-| 3                     | Quét web: Xóm Jobs → LinkedIn → TopCV → ITviec → VietnamWorks → 16 career page (mode`quick`: chỉ Xóm Jobs + LinkedIn)                                        |
+| 3                     | Quét web: Xóm Jobs → LinkedIn → TopCV → ITviec → VietnamWorks → career page ưu tiên (mode`quick`: chỉ Xóm Jobs + LinkedIn)                                        |
 | 4                     | Từ khoá 5 nhóm vị trí                                                                                                                                              |
 | 5                     | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                                                                  |
-| 6                     | Chuẩn hoá URL                                                                                                                                                         |
-| 7                     | Ghi`seen_urls` + `jobs_detail`                                                                                                                                      |
+| 6                     | Mở JD từng tin lấy Lương / YOE / Stack (trần: full 40 tin, quick 20 tin)                                                                                        |
+| 7                     | Ghi`jobs_detail` trước, rồi `seen_urls` (cả URL chính lẫn `alias_urls`)                                                                                    |
 | 8                     | Gửi email HTML                                                                                                                                                         |
-| **`cleanup`** | Task riêng, T2 07:00: đọc`jobs_detail`, archive dòng >90 ngày (guard: ≥50 dòng, ≤30%), xoá URL tương ứng khỏi `seen_urls`, gửi email báo cáo riêng |
+| **`cleanup`** | Task riêng, T2 07:00: đọc`jobs_detail`, archive dòng >90 ngày (guard: ≥50 dòng, tối đa 30% mỗi lần), xoá URL tương ứng khỏi `seen_urls`, gửi email báo cáo riêng |
 
 ---
 
@@ -434,8 +436,10 @@ Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
 > ---
 >
 > - Nguồn không truy cập được: LinkedIn (tường đăng nhập), TopCV (captcha)
-> - Career page lỗi: VinSmart Future (timeout)
-> - SEEN_COUNT: 1.847
+> - Nguồn chạm trần: ITviec (30 tin, còn tin chưa quét — lần sau bắt tiếp)
+> - Career page lỗi: VinBigData (timeout)
+> - Đã mở 12 JD, bỏ qua 0 tin vì chạm trần
+> - SEEN_COUNT: 2.310
 
 Những gì **không** xuất hiện: section không có tin (bỏ hẳn), URL trần, lương suy đoán.
 
@@ -448,17 +452,18 @@ Những gì **không** xuất hiện: section không có tin (bỏ hẳn), URL t
 > Kết quả: **DONE**
 > Đã archive: 213 dòng
 > jobs_detail: 1.847 → 1.634 dòng
-> seen_urls: 1.847 → 1.634 URL
+> seen_urls: 2.310 → 2.041 URL
 > archive: tổng 213 dòng
 > Dòng cũ nhất còn lại trong jobs_detail: 2026-09-16
 
-Bốn trạng thái có thể gặp:
+Năm trạng thái có thể gặp:
 
 | Tiêu đề  | Khi nào                                                                                                         | Bạn cần làm gì                                                                   |
 | ----------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `SKIPPED` | `jobs_detail` < 50 dòng, hoặc không dòng nào quá 90 ngày. **~3 tháng đầu sẽ toàn thế này** | Không                                                                               |
-| `DONE`    | Dọn thành công                                                                                                | Lần đầu thấy DONE thì mở sheet liếc qua cho chắc                             |
-| `BLOCKED` | Số dòng cần dọn > 30% tổng — thường là lần đầu có dữ liệu đủ 90 ngày                           | Tự cut dòng cũ sang`archive` bằng tay một lần (Phần 5)                      |
+| `DONE`    | Dọn thành công, không còn dòng nào chờ                                                                | Lần đầu thấy DONE thì mở sheet liếc qua cho chắc                             |
+| `PARTIAL` | Số dòng cần dọn vượt trần 30% mỗi lần → dọn 30% cũ nhất, phần còn lại để tuần sau        | Không. Vài tuần nữa nó tự về`DONE`                                          |
+| `BLOCKED` | Số dòng cần dọn > 80% tổng — bất thường, thường là`first_sent_at` hỏng định dạng      | Mở sheet kiểm tra cột`first_sent_at` (Phần 5)                                |
 | `FAILED`  | Append vào`archive` xong nhưng đếm không khớp → dừng trước khi xoá                                  | Xoá dòng vừa append trong`archive`, chạy lại (Phần 5). Không mất dữ liệu |
 
 Email dọn dẹp **luôn gửi**, kể cả `SKIPPED`, để bạn biết task còn sống.
@@ -584,10 +589,9 @@ Sheet chống trùng xử lý được phần lớn: một khi URL đã vào `se
 
 ## Email dọn dẹp báo BLOCKED hoặc FAILED
 
-**BLOCKED** — guard 30%: số dòng cần archive vượt 30% tổng `jobs_detail`, task dừng và báo thay vì xoá. Thường gặp khi:
+**BLOCKED** — guard 80%: số dòng cần archive vượt 80% tổng `jobs_detail`. Đây là mức bất thường, gần như luôn do dữ liệu hỏng chứ không phải do tồn đọng: mở sheet kiểm tra cột `first_sent_at` xem có dòng nào sai định dạng hoặc sai năm không, sửa về ISO 8601 rồi chạy lại task bằng tay.
 
-- Lần đầu tiên có dòng đủ 90 ngày (mọi dòng đầu tiên đều cũ cùng lúc) → mở sheet, tự cut các dòng cũ sang `archive` một lần bằng tay, rồi tuần sau task tự chạy bình thường.
-- Cột `first_sent_at` bị nhập sai định dạng ở một số dòng → sửa về ISO 8601.
+**PARTIAL** — không phải lỗi, không cần làm gì. Mỗi lần dọn task chỉ archive tối đa 30% số dòng hiện có, để một lần chạy không xoá quá nhiều. Lần đầu có dữ liệu đủ 90 ngày thường rơi vào trạng thái này vài tuần liền — số "còn chờ tuần sau" trong email sẽ giảm dần rồi về 0.
 
 **FAILED** — đã append vào `archive` nhưng số dòng không khớp, task dừng trước khi xoá. Sheet đang ở trạng thái: `archive` có thể có dòng trùng, `jobs_detail` và `seen_urls` **chưa mất gì**. Mở `archive`, xoá các dòng vừa append (nhìn theo `first_sent_at`), rồi chạy lại task bằng tay.
 
@@ -597,7 +601,7 @@ Cả hai trường hợp đều **không mất dữ liệu** — thiết kế l�
 
 Một spreadsheet chứa tối đa 10 triệu ô tính gộp trên tất cả các tab (Google đang nâng lên 20 triệu qua chương trình beta).
 
-Với 8 cột và giả sử 100 job mới mỗi ngày, bạn dùng khoảng 292.000 ô mỗi năm — chạm trần sau khoảng 34 năm. Hạn mức này không phải thứ đáng lo.
+Với 9 cột và giả sử 100 job mới mỗi ngày, bạn dùng khoảng 329.000 ô mỗi năm — chạm trần sau khoảng 30 năm. Hạn mức này không phải thứ đáng lo.
 
 Thứ hỏng trước là **khả năng đọc của Spark**: sau 6 tháng không dọn dẹp, nó phải nhét ~9.000 dòng vào context hai lần mỗi ngày, sẽ chậm rồi bắt đầu cắt bớt. Bản thân Sheets cũng chậm rõ từ khoảng 10.000 dòng.
 

@@ -11,7 +11,7 @@ Mỗi automation nằm trong một thư mục riêng, gồm:
 
 | Thư mục | Việc làm | Trạng thái |
 |---|---|---|
-| [`vn-data-job-radar/`](vn-data-job-radar/) | Quét tin tuyển dụng ngành data (DA / AE / DE / BI / BA) tại Hà Nội và TP.HCM từ Gmail Job Alerts + 5 trang tuyển dụng + career page, chống trùng bằng Google Sheet, gửi email tổng hợp 2 lần/ngày; task dọn dẹp sheet riêng mỗi thứ Hai | Bản 3.1 |
+| [`vn-data-job-radar/`](vn-data-job-radar/) | Quét tin tuyển dụng ngành data (DA / AE / DE / BI / BA) tại Hà Nội và TP.HCM từ Gmail Job Alerts + 5 trang tuyển dụng + career page, chống trùng bằng Google Sheet, gửi email tổng hợp 2 lần/ngày; task dọn dẹp sheet riêng mỗi thứ Hai | Bản 3.2 |
 
 ## Bắt đầu
 
