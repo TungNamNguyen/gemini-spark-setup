@@ -15,7 +15,7 @@ Tìm các tin tuyển dụng ngành dữ liệu **đăng trong 72 giờ gần nh
 | Tham số | Giá trị hợp lệ | Mặc định | Ghi chú |
 | --- | --- | --- | --- |
 | `city` | `Hà Nội` \| `TP.HCM` | `Hà Nội` | Nếu user không chỉ định, dùng mặc định và **ghi rõ trong mở đầu email** là đang dùng thành phố mặc định |
-| `mode` | `full` \| `quick` \| `cleanup` | `full` | `full` = quét đủ Gmail + 5 nguồn web + career page. `quick` = chỉ Gmail + Xóm Jobs + LinkedIn, bỏ career page — dùng cho buổi chiều. `cleanup` = **không quét gì**, chỉ dọn dẹp sheet và gửi email báo cáo riêng — xem mục "Chế độ cleanup" |
+| `mode` | `full` \| `quick` \| `cleanup` | `full` | `full` = quét đủ Gmail + 5 nguồn web + career page. `quick` = chỉ Gmail + Xóm Jobs + LinkedIn (cửa sổ 24 giờ), bỏ career page — dùng cho buổi chiều. `cleanup` = **không quét gì**, chỉ dọn dẹp sheet và gửi email báo cáo riêng — xem mục "Chế độ cleanup" |
 
 Không hỏi lại user khi thiếu tham số — skill chạy tự động, không có ai trả lời.
 
@@ -129,7 +129,8 @@ Chuẩn hoá URL (mục "Chuẩn hoá URL" ở trên) rồi so với SEEN — ch
 
 - Nhanh hơn browse web rất nhiều (chỉ đọc text)
 - Không bị captcha, rate-limit, hay giới hạn guest
-- Bắt được tin LinkedIn mà remote browser bỏ lỡ do không đăng nhập
+- Là nguồn duy nhất cho TopCV (web chặn bot), và bắt được tin LinkedIn chỉ hiện khi
+  đăng nhập mà endpoint guest ở Bước 3 không thấy
 - Bước 3 (quét web) sau đó chỉ cần bổ sung những gì email chưa có
 
 **Lưu ý:** chỉ trích URL job từ email, không đánh dấu email là đã đọc hay xoá.
@@ -137,39 +138,146 @@ Nếu label không tồn tại hoặc không có email mới, bỏ qua và đi t
 
 ## Bước 3 — Quét web
 
-Quét lần lượt 5 nguồn dưới đây. Nếu gặp lỗi ở nguồn nào thì ghi nhận và đi tiếp.
+Quét lần lượt 5 nguồn dưới đây. **Mở đúng URL đã cho** thay vì vào trang chủ rồi gõ ô
+tìm kiếm — mỗi lần điều hướng thừa tốn 10–20 giây quota và dễ dính bộ lọc mặc định
+sai. Nếu gặp lỗi ở nguồn nào thì ghi nhận và đi tiếp.
 
-**Nếu `mode = quick`:** chỉ quét Xóm Jobs và LinkedIn, bỏ 3 nguồn còn lại và bỏ hẳn
-mục "Công ty ưu tiên". Vẫn đánh dấu ⭐ nếu công ty nằm trong danh sách ưu tiên.
+**Nếu `mode = quick`:** chỉ quét Xóm Jobs và LinkedIn (dùng bộ URL `quick` ở mục 3.2),
+bỏ 3 nguồn còn lại và bỏ hẳn mục "Công ty ưu tiên". Vẫn đánh dấu ⭐ nếu công ty nằm
+trong danh sách ưu tiên.
 
-| Nguồn | Ghi chú |
-| --- | --- |
-| Xóm Jobs (jobs.xomdata.com) | Chuyên Data & AI VN. Lọc theo category, location, ngày đăng. Không cần đăng nhập. **Quét đầu tiên** |
-| LinkedIn Jobs | Dùng bộ lọc thời gian trong URL: `f_TPR=r259200` (= 72 giờ). Ví dụ: `linkedin.com/jobs/search/?keywords=Data%20Analyst&location=Hanoi%2C%20Vietnam&f_TPR=r259200`. **Best-effort:** guest gần như chắc chắn gặp tường đăng nhập sau 1–2 trang; nguồn chính cho LinkedIn là Gmail alert ở Bước 2 |
-| TopCV (topcv.vn) | Sắp xếp "Tin mới nhất", lọc địa điểm |
-| ITviec (itviec.com) | Tốt nhất cho Data Engineer / Analytics Engineer |
-| VietnamWorks (vietnamworks.com) | Sắp xếp "Ngày đăng mới nhất" |
+Giá trị `{city}` trong các URL bên dưới thay theo bảng này (mã hoá URL khi cần —
+khoảng trắng → `%20`, dấu phẩy → `%2C`):
 
-**Trần khối lượng cho mỗi nguồn** — chạm bất kỳ ngưỡng nào thì dừng nguồn đó, đi tiếp
-nguồn sau, và ghi vào báo cáo cuối email là nguồn đó "chạm trần":
+| `city` | Xóm Jobs `location=` | LinkedIn `location=` | ITviec path |
+| --- | --- | --- | --- |
+| Hà Nội | `Hà Nội` | `Hanoi, Vietnam` | `ha-noi` |
+| TP.HCM | `TP.Hồ Chí Minh` | `Ho Chi Minh City, Vietnam` | `ho-chi-minh-hcm` |
 
-- Tối đa **3 trang kết quả**
-- Hoặc tối đa **30 tin** đã trích xuất
+### 3.1 Xóm Jobs (jobs.xomdata.com) — quét đầu tiên
+
+Chuyên Data & AI Việt Nam, không chặn bot, bộ lọc nằm ngay trên URL. Mở lần lượt 4 URL,
+mỗi URL đọc 1 trang là đủ (đã lọc 3 ngày + thành phố nên thường dưới 20 tin):
+
+```
+https://jobs.xomdata.com/?category=data-analyst&location={city}&posted_days=3
+https://jobs.xomdata.com/?category=data-engineer&location={city}&posted_days=3
+https://jobs.xomdata.com/?category=analytics-engineer&location={city}&posted_days=3
+https://jobs.xomdata.com/?category=business-analyst&location={city}&posted_days=3
+```
+
+Xóm Jobs không có category BI riêng — tin BI nằm trong `data-analyst`. Mỗi tin trên trang
+danh sách có tiêu đề, công ty, địa điểm, level, ngày đăng tương đối.
+
+**Về URL:** Xóm Jobs là nguồn tổng hợp; trang chi tiết `jobs.xomdata.com/jobs/{id}` có
+link gốc, phần lớn trỏ về LinkedIn hoặc ITviec (**không** có TopCV). **Luôn lưu URL gốc**
+(đã chuẩn hoá theo mục "Chuẩn hoá URL") thay vì URL `jobs.xomdata.com/…`, để cùng một tin
+không bị lưu 2 URL khác nhau rồi lọt qua bộ lọc trùng. Tin không có link gốc thì giữ
+URL Xóm Jobs.
+
+### 3.2 LinkedIn — dùng endpoint guest, KHÔNG mở trang `jobs/search`
+
+`linkedin.com/jobs/search` là trang cho người dùng: cần JavaScript, và guest bị tường
+đăng nhập ngay sau trang đầu. Thay vào đó mở thẳng endpoint mà chính trang đó gọi ngầm
+để tải thêm tin cho khách — trả về danh sách thẻ tin HTML thuần, **không cần đăng nhập**,
+phân trang bằng `start`:
+
+```
+https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={từ khoá}&location={city}&f_TPR={cửa sổ}&start={0|10|20}
+```
+
+- `f_TPR=r259200` = 72 giờ. Mode `quick` dùng `f_TPR=r86400` (24 giờ): lần `full` buổi
+  sáng đã phủ 72 giờ, buổi chiều chỉ cần tin mới trong ngày
+- Mỗi trang đúng 10 tin, `start` tăng từng 10. Trang không có tin nào = hết kết quả, dừng
+- `keywords` hỗ trợ boolean với dấu ngoặc kép: `"Data Analyst" OR "Data Engineer"`
+
+**Bộ URL theo mode:**
+
+| Mode | `keywords=` | `start=` | `f_TPR=` | Số lần mở tối đa |
+| --- | --- | --- | --- | --- |
+| `full` | 5 query riêng, mỗi query một nhóm: `Data Analyst` · `Data Engineer` · `Business Intelligence` · `Analytics Engineer` · `Business Analyst` | `0`, `10` | `r259200` | 10 |
+| `quick` | 1 query gộp: `"Data Analyst" OR "Data Engineer" OR "Business Intelligence" OR "Analytics Engineer" OR "Business Analyst"` | `0`, `10`, `20` | `r86400` | 3 |
+
+Ví dụ `full`, Hà Nội, nhóm DA, trang 2:
+
+```
+https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Data%20Analyst&location=Hanoi%2C%20Vietnam&f_TPR=r259200&start=10
+```
+
+Ví dụ `quick`, TP.HCM, trang 1:
+
+```
+https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=%22Data%20Analyst%22%20OR%20%22Data%20Engineer%22%20OR%20%22Business%20Intelligence%22%20OR%20%22Analytics%20Engineer%22%20OR%20%22Business%20Analyst%22&location=Ho%20Chi%20Minh%20City%2C%20Vietnam&f_TPR=r86400&start=0
+```
+
+**Đọc mỗi thẻ tin:**
+
+- Tiêu đề, công ty, địa điểm. Các dạng `Hanoi Capital Region`, `Hanoi, Hanoi, Vietnam`,
+  `Hoàn Kiếm district, Hanoi, Vietnam`, `Ho Chi Minh City, Vietnam`,
+  `Ho Chi Minh City Metropolitan Area` đều tính là đúng thành phố
+- Link dạng `linkedin.com/jobs/view/{slug}-{id}?position=…&trackingId=…` → chuẩn hoá về
+  `https://linkedin.com/jobs/view/{id}`. ID cũng nằm trong thuộc tính
+  `data-entity-urn="urn:li:jobPosting:{id}"` của thẻ
+- **Ngày đăng:** thẻ `<time>` có thuộc tính `datetime="yyyy-MM-dd"` — nếu đọc được DOM
+  thì lấy thẳng giá trị này, không cần quy đổi. Nếu chỉ thấy chữ "12 hours ago" thì quy
+  đổi theo bảng ở đầu skill
+- Kết quả có lẫn tin ngoài thành phố (tỉnh lân cận) và tin không liên quan (Python
+  Developer, Data Scientist, Growth Specialist…) — lọc ở Bước 4–5 như bình thường
+
+**Nếu lần mở đầu tiên trả về trang đăng nhập, trang lỗi, hoặc trang trống trong khi
+các nguồn khác vẫn bình thường:** IP của remote browser đang bị LinkedIn chặn. Ghi
+LinkedIn là "không truy cập được (IP bị chặn)", **không thử các URL còn lại**, dựa vào
+Gmail alert ở Bước 2. Không dùng `linkedin.com/jobs/search` làm phương án dự phòng —
+nó bị chặn nặng hơn.
+
+### 3.3 TopCV (topcv.vn)
+
+Chặn bot bằng Cloudflare: remote browser gần như luôn gặp captcha, và Xóm Jobs
+**không** aggregate TopCV. Nguồn thực sự cho TopCV là Gmail label `TopCV` ở Bước 2.
+
+Chỉ thử **một lần**: mở `https://www.topcv.vn/tim-viec-lam-data-analyst?sort_by=new`,
+chờ tối đa 30 giây. Nếu ra danh sách tin (thường chỉ khi Spark chạy trên Chrome local đã
+đăng nhập) → quét thêm `tim-viec-lam-data-engineer` và `tim-viec-lam-business-analyst`
+cùng tham số, lọc địa điểm theo `{city}`, mỗi từ khoá 1 trang. Nếu gặp captcha /
+"Attention Required" / trang trống → ghi "không truy cập được (captcha)", đi tiếp ngay.
+**Không** chờ captcha, không reload, không thử URL khác.
+
+### 3.4 ITviec (itviec.com)
+
+Tốt nhất cho Data Engineer / Analytics Engineer. URL đã lọc sẵn từ khoá + thành phố +
+sắp xếp mới nhất:
+
+```
+https://itviec.com/it-jobs/data-analyst/{city}?sort=newest
+https://itviec.com/it-jobs/data-engineer/{city}?sort=newest
+https://itviec.com/it-jobs/business-intelligence/{city}?sort=newest
+```
+
+Mỗi URL 1 trang. Tin hiện "Posted x days ago" và đã sắp xếp mới nhất trước — gặp tin
+đầu tiên quá 3 ngày thì dừng URL đó.
+
+### 3.5 VietnamWorks (vietnamworks.com)
+
+Mở `https://www.vietnamworks.com/viec-lam?q=data%20analyst`, chọn sắp xếp "Ngày đăng
+mới nhất", lọc địa điểm theo `{city}`. Lặp lại với `q=data%20engineer`. Trang render
+bằng JavaScript nên chờ tải xong rồi mới đọc; mỗi từ khoá 1 trang.
+
+### Trần khối lượng cho mỗi nguồn
+
+Chạm bất kỳ ngưỡng nào thì dừng nguồn đó, đi tiếp nguồn sau, và ghi vào báo cáo cuối
+email là nguồn đó "chạm trần":
+
+- Tối đa số lần mở URL đã ghi ở từng mục (LinkedIn `full` 10, `quick` 3; Xóm Jobs 4;
+  ITviec 3; TopCV 3; VietnamWorks 2)
+- Hoặc tối đa **40 tin** đã trích xuất từ nguồn đó
 - Hoặc tối đa **3 phút** cho một nguồn
 
 Ngưỡng này để một nguồn chậm không nuốt hết thời gian của cả task. Tin bỏ lỡ hôm nay
 vẫn nằm trong 72 giờ nên lần chạy sau còn bắt được.
 
-**Về URL từ nguồn tổng hợp:** Xóm Jobs aggregate tin từ TopCV, LinkedIn, Vieclam24h.
-Nếu tin trên Xóm Jobs có link gốc trỏ về nguồn (TopCV, LinkedIn…), **ưu tiên lưu URL
-nguồn gốc** vào `seen_urls` thay vì URL `jobs.xomdata.com/…`. Điều này tránh cùng
-một tin bị lưu 2 URL khác nhau và lọt qua bộ lọc trùng.
-
 **Về cách duyệt web:** skill thường chạy tự động khi user không mở máy, nên
-**mặc định dùng remote browser**. Một số nguồn (đặc biệt LinkedIn) sẽ giới hạn
-kết quả cho guest — đây là bình thường, không cần xử lý.
-Nếu gặp captcha hoặc tường đăng nhập, ghi nhận nguồn đó là "không truy cập được"
-và đi tiếp — không dừng cả task vì một nguồn.
+**mặc định dùng remote browser**. Nếu gặp captcha hoặc tường đăng nhập, ghi nhận nguồn
+đó là "không truy cập được" và đi tiếp — không dừng cả task vì một nguồn.
 
 ### Công ty ưu tiên
 
@@ -293,6 +401,18 @@ Nếu số tin còn lại vượt trần, xếp thứ tự ưu tiên rồi mở 
 2. `posted_date` mới nhất
 3. Nhóm `AE` → `DE` → `BI` → `DA` → `BA`
 
+**Riêng tin LinkedIn** — kể cả tin đến từ Gmail alert hay từ Xóm Jobs mà URL gốc là
+LinkedIn: **không** mở `linkedin.com/jobs/view/{id}` (guest bị tường đăng nhập). Mở
+endpoint guest của JD:
+
+```
+https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{id}
+```
+
+Trả về JD đầy đủ, kèm Seniority level, Employment type, Job function — không cần đăng
+nhập. URL này **chỉ để đọc**; `job_url` ghi vào sheet và link trong email vẫn là
+`https://linkedin.com/jobs/view/{id}`.
+
 Với mỗi JD mở được: lấy Lương, YOE, Stack chính (tối đa 4 công nghệ), và áp dụng nốt
 các luật **[cần JD]** ở Bước 5.
 
@@ -358,7 +478,7 @@ Nếu city đang dùng giá trị mặc định, nói rõ ở đây.}</p>
 <hr>
 <p><b>Báo cáo lần chạy</b></p>
 <ul>
-  <li>Nguồn không truy cập được: {LinkedIn (tường đăng nhập), TopCV (captcha) | không có}</li>
+  <li>Nguồn không truy cập được: {TopCV (captcha), LinkedIn (IP bị chặn) | không có}</li>
   <li>Nguồn chạm trần: {ITviec (30 tin, còn tin chưa quét) | không có}</li>
   <li>Career page lỗi: {VinBigData (timeout) | không có}</li>
   <li>Đã mở {n} JD, bỏ qua {m} tin vì chạm trần</li>

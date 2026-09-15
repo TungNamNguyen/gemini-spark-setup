@@ -16,7 +16,7 @@ Ngày 1 (~45 phút): Bước 1 → 3b.2. Ngày 2 (~15 phút + 25 phút chờ tes
 **Nguyên tắc thiết kế của bản này:**
 
 - Task chạy tự động lúc bạn không mở máy → **dùng remote browser**, không phụ thuộc Chrome local.
-- Remote browser bị LinkedIn/TopCV chặn → **Gmail Job Alerts là nguồn chính**, web chỉ bổ sung.
+- TopCV chặn remote browser → **Gmail Job Alerts là nguồn chính cho TopCV**. LinkedIn quét qua endpoint guest `jobs-guest` (không cần đăng nhập), Gmail là dự phòng.
 - Chống trùng bằng Google Sheet, không bằng trí nhớ của agent.
 - Dọn dẹp sheet là **task riêng**, không nhét vào task quét.
 
@@ -130,7 +130,7 @@ File `Job Radar Tracker` phải có đúng 3 tab: `seen_urls`, `jobs_detail`, `a
 
 ## Bước 3b — Đăng ký Job Alert và tạo Gmail label (15 phút)
 
-**Đây là bước quyết định chất lượng kết quả.** Skill đọc job alert từ Gmail *trước* khi duyệt web, vì email không dính captcha và bắt được tin LinkedIn mà remote browser không thấy. Nếu bỏ qua bước này, skill vẫn chạy nhưng sẽ mỏng đi rất nhiều.
+**Đây là bước quyết định chất lượng kết quả.** Skill đọc job alert từ Gmail *trước* khi duyệt web, vì email không dính captcha, là nguồn duy nhất cho TopCV, và bắt được tin LinkedIn chỉ hiện khi đăng nhập. Nếu bỏ qua bước này, skill vẫn chạy nhưng sẽ mỏng đi rất nhiều.
 
 ### 3b.1 Đăng ký nhận alert trên 5 trang
 
@@ -248,7 +248,7 @@ Nhắn vào thread:
 Chạy lại ngay bây giờ, mode: quick.
 ```
 
-Kiểm tra: work panel cho thấy nó **chỉ** đọc Gmail, Xóm Jobs, LinkedIn — không mở TopCV/ITviec/VietnamWorks, không mở career page. Nếu nó vẫn quét đủ, nhắn: *"Ở mode quick, chỉ quét Gmail + Xóm Jobs + LinkedIn theo đúng skill."*
+Kiểm tra: work panel cho thấy nó **chỉ** đọc Gmail, Xóm Jobs, LinkedIn (URL có `jobs-guest` và `f_TPR=r86400`, tối đa 3 lần mở) — không mở TopCV/ITviec/VietnamWorks, không mở career page. Nếu nó vẫn quét đủ, nhắn: *"Ở mode quick, chỉ quét Gmail + Xóm Jobs + LinkedIn theo đúng skill."*
 
 ## Bước 8 — Tạo Task thứ hai (2 phút)
 
@@ -301,7 +301,8 @@ Lệch 20 phút giữa hai task quét để không chạy chồng nhau — task 
 | Email không về                                                  | Lịch không chạy, hoặc task đang chờ bạn confirm | Mở Spark → Tasks, xem có task nào đang pending không                                                      |
 | Nhận lại tin cũ                                                | Chống trùng hỏng                                    | Quay lại Bước 7                                                                                              |
 | `SEEN_COUNT` đột nhiên về 0                                 | Không đọc được sheet                             | Kiểm tra tên file/tab, quyền Workspace                                                                       |
-| Dòng "nguồn không truy cập được" luôn có LinkedIn, TopCV | Bình thường với remote browser                     | Kiểm tra label Gmail của 2 nguồn đó có email đều không (Bước 3b.4)                                   |
+| Dòng "nguồn không truy cập được" luôn có TopCV            | Bình thường với remote browser                     | Kiểm tra label Gmail `TopCV` có email đều không (Bước 3b.4)                                          |
+| Dòng "nguồn không truy cập được" có LinkedIn nhiều ngày   | IP remote browser bị LinkedIn chặn                 | Xem mục "LinkedIn không truy cập được" ở Phần 5; Gmail `LinkedIn Job Alerts` vẫn bù được               |
 | Quá nhiều tin rác                                              | Bộ lọc lỏng                                         | Nhắn:`Loại hết tin từ công ty outsourcing và headhunt, chỉ giữ product company, ngân hàng, fintech` |
 | Quá ít tin                                                      | Alert Gmail chưa về hoặc filter chưa gắn label    | Xem Bước 3b.4                                                                                                 |
 | Toàn tin senior                                                  | Chưa lọc YOE                                         | Nhắn:`Chỉ giữ tin yêu cầu dưới 3 năm kinh nghiệm`                                                    |
@@ -326,10 +327,10 @@ Tóm tắt luồng để bạn đối chiếu khi đọc work panel. Task quét 
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1                     | Đọc`seen_urls` cột A → SEEN, đếm `SEEN_COUNT`                                                                                                                                  |
 | 2                     | Đọc 5 Gmail label, trích URL job                                                                                                                                                      |
-| 3                     | Quét web: Xóm Jobs → LinkedIn → TopCV → ITviec → VietnamWorks → career page ưu tiên (mode`quick`: chỉ Xóm Jobs + LinkedIn)                                                  |
+| 3                     | Quét web bằng URL lọc sẵn: Xóm Jobs (4 URL) → LinkedIn endpoint guest (`full` 10 URL / `quick` 3 URL) → TopCV (thử 1 lần) → ITviec (3 URL) → VietnamWorks → career page ưu tiên (mode`quick`: chỉ Xóm Jobs + LinkedIn) |
 | 4                     | Từ khoá 5 nhóm vị trí                                                                                                                                                               |
 | 5                     | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                                                                                   |
-| 6                     | Mở JD từng tin lấy Lương / YOE / Stack (trần: full 40 tin, quick 20 tin)                                                                                                           |
+| 6                     | Mở JD từng tin lấy Lương / YOE / Stack (trần: full 40 tin, quick 20 tin); tin LinkedIn mở qua `jobs-guest/jobs/api/jobPosting/{id}`                                              |
 | 7                     | Ghi`jobs_detail` trước, rồi `seen_urls` (cả URL chính lẫn `alias_urls`)                                                                                                      |
 | 8                     | Gửi email HTML theo khung cố định, cuối email có link tới sheet                                                                                                                   |
 | **`cleanup`** | Task riêng, T2 07:00: đọc`jobs_detail`, archive dòng >90 ngày (guard: ≥50 dòng, tối đa 30% mỗi lần), xoá URL tương ứng khỏi `seen_urls`, gửi email báo cáo riêng |
@@ -438,7 +439,7 @@ Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
 >
 > **Báo cáo lần chạy**
 >
-> - Nguồn không truy cập được: LinkedIn (tường đăng nhập), TopCV (captcha)
+> - Nguồn không truy cập được: TopCV (captcha)
 > - Nguồn chạm trần: ITviec (30 tin, còn tin chưa quét)
 > - Career page lỗi: không có
 > - Đã mở 12 JD, bỏ qua 0 tin vì chạm trần
@@ -541,16 +542,32 @@ tiêu đề section là "{Thành phố} — {dd/MM HH:mm}".
 
 Rồi ghim Doc đó lên màn hình chính điện thoại.
 
-## LinkedIn / TopCV luôn "không truy cập được"
+## TopCV luôn "không truy cập được"
 
-**Đây là bình thường** với remote browser — hai trang này chặn bot mạnh. Skill được thiết kế để bù bằng Gmail alert: tin LinkedIn/TopCV đến từ email, không từ web.
+**Đây là bình thường** với remote browser — TopCV chặn bot bằng Cloudflare, và Xóm Jobs không aggregate TopCV. Skill được thiết kế để chỉ thử TopCV một lần rồi đi tiếp; tin TopCV đến từ Gmail label `TopCV`.
 
-Kiểm tra: Gmail → label `LinkedIn Job Alerts` và `TopCV` → có email trong 3 ngày gần nhất không?
+Kiểm tra: Gmail → label `TopCV` → có email trong 3 ngày gần nhất không?
 
 - **Có** → không cần làm gì, dòng "không truy cập được" chỉ là thông tin.
 - **Không** → alert chưa tạo hoặc filter chưa gắn label. Làm lại Bước 3b.
 
-**Nếu vẫn muốn quét web LinkedIn/TopCV đầy đủ:** dùng Spark trên Chrome desktop với auto browse, đăng nhập sẵn. Đánh đổi: máy phải bật và Chrome phải chạy vào giờ schedule; tắt máy giữa chừng thì Spark rơi về remote browser. Với đa số người dùng, Gmail alert là đủ và đỡ phiền hơn.
+**Nếu vẫn muốn quét web TopCV đầy đủ:** dùng Spark trên Chrome desktop với auto browse, đăng nhập sẵn TopCV. Đánh đổi: máy phải bật và Chrome phải chạy vào giờ schedule; tắt máy giữa chừng thì Spark rơi về remote browser. Với đa số người dùng, Gmail alert là đủ và đỡ phiền hơn.
+
+## LinkedIn "không truy cập được"
+
+**Không còn là bình thường** từ bản 3.3. Skill không mở `linkedin.com/jobs/search` (tường đăng nhập) mà mở endpoint guest:
+
+```
+https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Data%20Analyst&location=Hanoi%2C%20Vietnam&f_TPR=r259200&start=0
+```
+
+Endpoint này là thứ chính trang LinkedIn gọi ngầm để tải thêm tin cho khách chưa đăng nhập, nên nó không có tường đăng nhập và không cần JavaScript. Nếu nó vẫn báo "không truy cập được":
+
+1. **Dán URL trên vào trình duyệt của bạn.** Thấy danh sách tin → endpoint sống, vấn đề nằm ở IP của remote browser bị LinkedIn chặn. Không thấy gì / bị chuyển sang trang đăng nhập → LinkedIn đã đổi endpoint, cần cập nhật skill.
+2. Nếu là IP bị chặn: thường tự hết sau vài giờ vì remote browser đổi IP. Trong lúc đó Gmail `LinkedIn Job Alerts` vẫn bù được — kiểm tra label có email đều không.
+3. Nếu bị chặn liên tục nhiều ngày: chạy Spark trên Chrome desktop (IP nhà) hoặc tăng khoảng cách giữa hai lần chạy.
+
+**Lưu ý:** cùng cơ chế này, JD của tin LinkedIn được đọc qua `linkedin.com/jobs-guest/jobs/api/jobPosting/{id}`. Nếu email có nhiều tin LinkedIn mà Lương/YOE/Stack toàn `không rõ`, nhắn vào thread: *"Với tin LinkedIn, mở JD qua endpoint jobs-guest/jobs/api/jobPosting/{id} theo đúng skill, không mở jobs/view."*
 
 ## Email không về
 
