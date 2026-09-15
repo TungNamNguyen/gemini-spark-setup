@@ -2,7 +2,6 @@
 name: vn-data-job-radar
 description: Quét các trang tuyển dụng Việt Nam tìm tin tuyển dụng mới ngành dữ liệu (Data Analyst, Analytics Engineer, Data Engineer, Business Intelligence, Business Analyst), lọc theo thành phố và ngày đăng, khử trùng lặp bằng Google Sheet, rồi gửi email tổng hợp. Dùng khi cần theo dõi thị trường việc làm data tại Hà Nội hoặc TP.HCM.
 ---
-
 # VN Data Job Radar
 
 **Phiên bản skill: 3.3.** Luôn ghi số này vào dòng `Skill:` trong khối báo cáo cuối email,
@@ -15,10 +14,10 @@ Tìm các tin tuyển dụng ngành dữ liệu **đăng trong 72 giờ gần nh
 
 ## Tham số đầu vào
 
-| Tham số | Giá trị hợp lệ | Mặc định | Ghi chú |
-| --- | --- | --- | --- |
-| `city` | `Hà Nội` \| `TP.HCM` | `Hà Nội` | Nếu user không chỉ định, dùng mặc định và **ghi rõ trong mở đầu email** là đang dùng thành phố mặc định |
-| `mode` | `full` \| `quick` \| `cleanup` | `full` | `full` = quét đủ Gmail + 5 nguồn web + career page. `quick` = chỉ Gmail + Xóm Jobs + LinkedIn (cửa sổ 24 giờ), bỏ career page — dùng cho buổi chiều. `cleanup` = **không quét gì**, chỉ dọn dẹp sheet và gửi email báo cáo riêng — xem mục "Chế độ cleanup" |
+| Tham số | Giá trị hợp lệ                   | Mặc định  | Ghi chú                                                                                                                                                                                                                                                                                              |
+| -------- | ------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `city` | `Hà Nội` \| `TP.HCM`           | `Hà Nội` | Nếu user không chỉ định, dùng mặc định và**ghi rõ trong mở đầu email** là đang dùng thành phố mặc định                                                                                                                                                                    |
+| `mode` | `full` \| `quick` \| `cleanup` | `full`     | `full` = quét đủ Gmail + 5 nguồn web + career page. `quick` = chỉ Gmail + Xóm Jobs + LinkedIn (cửa sổ 24 giờ), bỏ career page — dùng cho buổi chiều. `cleanup` = **không quét gì**, chỉ dọn dẹp sheet và gửi email báo cáo riêng — xem mục "Chế độ cleanup" |
 
 Không hỏi lại user khi thiếu tham số — skill chạy tự động, không có ai trả lời.
 
@@ -29,14 +28,14 @@ chạy trước" — chỉ cần URL chưa có trong SEEN là gửi.
 
 Áp dụng thống nhất cho mọi chỗ ghi vào sheet và mọi phép so sánh ngày:
 
-| Trường | Định dạng | Ví dụ |
-| --- | --- | --- |
-| `first_sent_at` | ISO 8601 có múi giờ | `2026-09-12T08:30:00+07:00` |
-| `posted_date` | `yyyy-MM-dd`; không rõ thì `không rõ` | `2026-09-11` |
-| `city` | Đúng một trong: `Hà Nội`, `TP.HCM`, `Remote`, `Hybrid` | `Hà Nội` |
-| `role_group` | Đúng một trong: `DA`, `AE`, `DE`, `BI`, `BA` | `DE` |
-| `source` | Đúng một trong: `xomjobs`, `linkedin`, `topcv`, `itviec`, `vietnamworks`, `gmail`, `career_page` | `topcv` |
-| `alias_urls` | Các URL trùng đã gộp ở Bước 5, ngăn nhau bằng dấu phẩy, không có khoảng trắng. Rỗng nếu không có bản trùng | `https://linkedin.com/jobs/view/4123456789,https://itviec.com/it-jobs/data-engineer-abc` |
+| Trường          | Định dạng                                                                                                                     | Ví dụ                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `first_sent_at` | ISO 8601 có múi giờ                                                                                                           | `2026-09-12T08:30:00+07:00`                                                              |
+| `posted_date`   | `yyyy-MM-dd`; không rõ thì `không rõ`                                                                                   | `2026-09-11`                                                                             |
+| `city`          | Đúng một trong:`Hà Nội`, `TP.HCM`, `Remote`, `Hybrid`                                                               | `Hà Nội`                                                                               |
+| `role_group`    | Đúng một trong:`DA`, `AE`, `DE`, `BI`, `BA`                                                                         | `DE`                                                                                     |
+| `source`        | Đúng một trong:`xomjobs`, `linkedin`, `topcv`, `itviec`, `vietnamworks`, `gmail`, `career_page`                 | `topcv`                                                                                  |
+| `alias_urls`    | Các URL trùng đã gộp ở Bước 5, ngăn nhau bằng dấu phẩy, không có khoảng trắng. Rỗng nếu không có bản trùng | `https://linkedin.com/jobs/view/4123456789,https://itviec.com/it-jobs/data-engineer-abc` |
 
 Mọi phép tính "72 giờ", "90 ngày" đều dùng múi giờ Asia/Ho_Chi_Minh (GMT+7).
 
@@ -45,14 +44,14 @@ Mọi phép tính "72 giờ", "90 ngày" đều dùng múi giờ Asia/Ho_Chi_Min
 Phần lớn nguồn hiển thị ngày đăng dạng tương đối. Quy đổi ngay khi trích xuất, lấy
 mốc là **ngày chạy theo GMT+7**:
 
-| Hiển thị trên tin | Quy đổi |
-| --- | --- |
-| "hôm nay", "today", "vừa xong", "x giờ trước", "x hours ago" | ngày chạy |
-| "hôm qua", "yesterday", "1 ngày trước" | ngày chạy − 1 |
-| "x ngày trước", "x days ago" | ngày chạy − x |
-| "x tuần trước", "x weeks ago" | ngày chạy − 7x → luôn ngoài 72 giờ, loại |
-| "30+ days ago", "hơn 30 ngày" | loại thẳng, không cần quy đổi |
-| Không thấy ngày ở bất kỳ đâu | `không rõ` → xử lý theo Bước 5 |
+| Hiển thị trên tin                                              | Quy đổi                                        |
+| ----------------------------------------------------------------- | ------------------------------------------------ |
+| "hôm nay", "today", "vừa xong", "x giờ trước", "x hours ago" | ngày chạy                                      |
+| "hôm qua", "yesterday", "1 ngày trước"                        | ngày chạy − 1                                 |
+| "x ngày trước", "x days ago"                                   | ngày chạy − x                                 |
+| "x tuần trước", "x weeks ago"                                  | ngày chạy − 7x → luôn ngoài 72 giờ, loại |
+| "30+ days ago", "hơn 30 ngày"                                   | loại thẳng, không cần quy đổi              |
+| Không thấy ngày ở bất kỳ đâu                              | `không rõ` → xử lý theo Bước 5          |
 
 ## Chuẩn hoá URL
 
@@ -92,11 +91,11 @@ khoá phụ `company|title` ở Bước 5.
 Sheet có 3 tab với vai trò tách bạch. Tuân thủ đúng vai trò này là bắt buộc,
 vì nó quyết định hiệu năng của mọi lần chạy.
 
-| Tab | Cột | Vai trò |
-| --- | --- | --- |
-| `seen_urls` | A: job_url | **CHỈ ĐỌC + append.** Tab duy nhất được đọc trong lần chạy thường |
-| `jobs_detail` | A–I | **CHỈ GHI** ở mode `full`/`quick`. **Chỉ mode `cleanup`** được đọc tab này |
-| `archive` | A–I | **CHỈ GHI.** Không bao giờ đọc, không bao giờ xoá |
+| Tab             | Cột       | Vai trò                                                                                              |
+| --------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `seen_urls`   | A: job_url | **CHỈ ĐỌC + append.** Tab duy nhất được đọc trong lần chạy thường                  |
+| `jobs_detail` | A–I       | **CHỈ GHI** ở mode `full`/`quick`. **Chỉ mode `cleanup`** được đọc tab này |
+| `archive`     | A–I       | **CHỈ GHI.** Không bao giờ đọc, không bao giờ xoá                                       |
 
 Header của `jobs_detail` và `archive`:
 `job_url | title | company | city | role_group | posted_date | source | first_sent_at | alias_urls`
@@ -117,13 +116,13 @@ với SEEN rỗng.
 
 Đọc email trong 72 giờ gần nhất từ 5 Gmail label sau:
 
-| Gmail Label | Nguồn tương ứng |
-| --- | --- |
-| `ITViec Job Alerts` | ITviec |
-| `LinkedIn Job Alerts` | LinkedIn Jobs |
-| `VietnamWorks Job Alert` | VietnamWorks |
-| `TopCV` | TopCV |
-| `Xom Job Alerts` | Xóm Jobs |
+| Gmail Label                | Nguồn tương ứng |
+| -------------------------- | ------------------- |
+| `ITViec Job Alerts`      | ITviec              |
+| `LinkedIn Job Alerts`    | LinkedIn Jobs       |
+| `VietnamWorks Job Alert` | VietnamWorks        |
+| `TopCV`                  | TopCV               |
+| `Xom Job Alerts`         | Xóm Jobs           |
 
 Với mỗi email, trích xuất danh sách job URL + tên vị trí + công ty.
 Chuẩn hoá URL (mục "Chuẩn hoá URL" ở trên) rồi so với SEEN — chỉ giữ URL chưa có.
@@ -152,10 +151,10 @@ trong danh sách ưu tiên.
 Giá trị `{city}` trong các URL bên dưới thay theo bảng này (mã hoá URL khi cần —
 khoảng trắng → `%20`, dấu phẩy → `%2C`):
 
-| `city` | Xóm Jobs `location=` | LinkedIn `location=` | ITviec path |
-| --- | --- | --- | --- |
-| Hà Nội | `Hà Nội` | `Hanoi, Vietnam` | `ha-noi` |
-| TP.HCM | `TP.Hồ Chí Minh` | `Ho Chi Minh City, Vietnam` | `ho-chi-minh-hcm` |
+| `city` | Xóm Jobs`location=` | LinkedIn`location=`         | ITviec path         |
+| -------- | ---------------------- | ----------------------------- | ------------------- |
+| Hà Nội | `Hà Nội`           | `Hanoi, Vietnam`            | `ha-noi`          |
+| TP.HCM   | `TP.Hồ Chí Minh`   | `Ho Chi Minh City, Vietnam` | `ho-chi-minh-hcm` |
 
 ### 3.1 Xóm Jobs (jobs.xomdata.com) — quét đầu tiên
 
@@ -196,10 +195,10 @@ https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=
 
 **Bộ URL theo mode:**
 
-| Mode | `keywords=` | `start=` | `f_TPR=` | Số lần mở tối đa |
-| --- | --- | --- | --- | --- |
-| `full` | 5 query riêng, mỗi query một nhóm: `Data Analyst` · `Data Engineer` · `Business Intelligence` · `Analytics Engineer` · `Business Analyst` | `0`, `10` | `r259200` | 10 |
-| `quick` | 1 query gộp: `"Data Analyst" OR "Data Engineer" OR "Business Intelligence" OR "Analytics Engineer" OR "Business Analyst"` | `0`, `10`, `20` | `r86400` | 3 |
+| Mode      | `keywords=`                                                                                                                                              | `start=`            | `f_TPR=`  | Số lần mở tối đa |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------- | --------------------- |
+| `full`  | 5 query riêng, mỗi query một nhóm:`Data Analyst` · `Data Engineer` · `Business Intelligence` · `Analytics Engineer` · `Business Analyst` | `0`, `10`         | `r259200` | 10                    |
+| `quick` | 1 query gộp:`"Data Analyst" OR "Data Engineer" OR "Business Intelligence" OR "Analytics Engineer" OR "Business Analyst"`                                | `0`, `10`, `20` | `r86400`  | 3                     |
 
 Ví dụ `full`, Hà Nội, nhóm DA, trang 2:
 
@@ -239,8 +238,7 @@ Chặn bot bằng Cloudflare: remote browser gần như luôn gặp captcha, và
 **không** aggregate TopCV. Nguồn thực sự cho TopCV là Gmail label `TopCV` ở Bước 2.
 
 Chỉ thử **một lần**: mở `https://www.topcv.vn/tim-viec-lam-data-analyst?sort_by=new`,
-chờ tối đa 30 giây. Nếu ra danh sách tin (thường chỉ khi Spark chạy trên Chrome local đã
-đăng nhập) → quét thêm `tim-viec-lam-data-engineer` và `tim-viec-lam-business-analyst`
+chờ tối đa 30 giây. Nếu ra danh sách tin → quét thêm `tim-viec-lam-data-engineer` và `tim-viec-lam-business-analyst`
 cùng tham số, lọc địa điểm theo `{city}`, mỗi từ khoá 1 trang. Nếu gặp captcha /
 "Attention Required" / trang trống → ghi "không truy cập được (captcha)", đi tiếp ngay.
 **Không** chờ captcha, không reload, không thử URL khác.
@@ -278,9 +276,10 @@ email là nguồn đó "chạm trần":
 Ngưỡng này để một nguồn chậm không nuốt hết thời gian của cả task. Tin bỏ lỡ hôm nay
 vẫn nằm trong 72 giờ nên lần chạy sau còn bắt được.
 
-**Về cách duyệt web:** skill thường chạy tự động khi user không mở máy, nên
-**mặc định dùng remote browser**. Nếu gặp captcha hoặc tường đăng nhập, ghi nhận nguồn
-đó là "không truy cập được" và đi tiếp — không dừng cả task vì một nguồn.
+**Về cách duyệt web:** **luôn dùng remote browser. Không dùng Chrome trên máy của
+user**, kể cả khi máy đang mở — skill chạy tự động theo lịch và không được phụ thuộc vào
+máy cá nhân. Nếu gặp captcha hoặc tường đăng nhập, ghi nhận nguồn đó là "không truy cập
+được" và đi tiếp — không dừng cả task vì một nguồn.
 
 ### Công ty ưu tiên
 
