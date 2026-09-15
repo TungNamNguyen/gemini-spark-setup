@@ -5,6 +5,9 @@ description: Quét các trang tuyển dụng Việt Nam tìm tin tuyển dụng 
 
 # VN Data Job Radar
 
+**Phiên bản skill: 3.3.** Luôn ghi số này vào dòng `Skill:` trong khối báo cáo cuối email,
+để user biết task đang chạy đúng bản skill mới nhất.
+
 ## Mục tiêu
 
 Tìm các tin tuyển dụng ngành dữ liệu **đăng trong 72 giờ gần nhất**, tại thành phố
@@ -483,6 +486,7 @@ Nếu city đang dùng giá trị mặc định, nói rõ ở đây.}</p>
   <li>Career page lỗi: {VinBigData (timeout) | không có}</li>
   <li>Đã mở {n} JD, bỏ qua {m} tin vì chạm trần</li>
   <li>SEEN_COUNT: {SEEN_COUNT}</li>
+  <li>Skill: v3.3</li>
 </ul>
 <p>📋 Link tới Google Sheet: <a href="{url của sheet}">Job Radar Tracker</a> — tab <code>jobs_detail</code> có đủ mọi tin từ trước tới nay, tab <code>archive</code> có tin cũ hơn 90 ngày.</p>
 ```
@@ -508,9 +512,10 @@ Nếu city đang dùng giá trị mặc định, nói rõ ở đây.}</p>
 - **Link:** anchor text ngắn "Xem tin" trỏ tới `job_url`, không dán URL trần
 - **Vị trí (nhóm BA):** ghi thêm ` — BA thiên data` hoặc ` — IT BA thuần` sau tên vị trí,
   theo kết quả Bước 5
-- **Khối báo cáo:** đủ 5 dòng, đúng thứ tự, luôn có mặt; dòng nào không có gì thì ghi
+- **Khối báo cáo:** đủ 6 dòng, đúng thứ tự, luôn có mặt; dòng nào không có gì thì ghi
   `không có`, không bỏ dòng. `SEEN_COUNT` là để user tự kiểm tra bộ nhớ chống trùng còn
-  sống — nếu đột nhiên về 0 trong khi trước đó vẫn lớn, tức là có lỗi
+  sống — nếu đột nhiên về 0 trong khi trước đó vẫn lớn, tức là có lỗi. `Skill:` là số
+  phiên bản ghi ở đầu skill — user đối chiếu để biết Spark đã nhận bản mới chưa
 - **Link sheet:** trỏ tới đúng file `Job Radar Tracker` đã mở ở Bước 1. Không bịa URL
 
 **Nếu không có tin mới nào:** vẫn gửi email, tiêu đề

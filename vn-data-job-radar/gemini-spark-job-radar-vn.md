@@ -1,6 +1,6 @@
 # Gemini Spark — Job Radar cho ngành Data (Hà Nội / TP.HCM)
 
-**Phiên bản 3.1** — cấu trúc Sheet 3 tab, Gmail Job Alerts làm nguồn chính, remote browser, task dọn dẹp tách riêng, kèm hướng dẫn setup từng bước.
+**Phiên bản 3.3** — cấu trúc Sheet 3 tab, LinkedIn quét qua endpoint guest (không cần đăng nhập), Gmail Job Alerts là nguồn chính cho TopCV, remote browser, task dọn dẹp tách riêng, kèm hướng dẫn setup từng bước.
 
 Thời gian setup: **2 ngày**, tổng khoảng 60 phút thao tác.
 Ngày 1 (~45 phút): Bước 1 → 3b.2. Ngày 2 (~15 phút + 25 phút chờ test): Bước 3b.3 → 9, sau khi email alert đầu tiên đã về.
@@ -186,6 +186,8 @@ Gmail → click từng label ở cột trái → phải thấy ít nhất 1 emai
 Kiểm tra: quay lại trang Skills, phải thấy skill tên `vn-data-job-radar`.
 
 > Từ bản 3, nội dung skill **chỉ nằm trong `SKILL.md`**, không chép lại vào tài liệu này nữa để tránh hai bản lệch nhau. Sửa skill thì sửa `SKILL.md` rồi dán lại vào Spark.
+>
+> **Cập nhật skill đã có:** Spark không đọc file trên máy hay trên git, và nhắn "dùng skill mới nhất" vào thread cũng không có tác dụng. Vào **Spark → Skills → mở skill `vn-data-job-radar` → Edit**, xoá hết nội dung cũ, dán toàn bộ `SKILL.md` mới, Lưu. **Không** tạo skill thứ hai cùng tên — Spark sẽ không biết chọn cái nào. Sau khi dán, chạy tay 1 lần và nhìn dòng `Skill: v3.3` ở cuối email: khớp số ở đầu `SKILL.md` là đã nhận bản mới.
 
 ## Bước 5 — Tạo Task đầu tiên (3 phút)
 
@@ -306,6 +308,7 @@ Lệch 20 phút giữa hai task quét để không chạy chồng nhau — task 
 | Quá nhiều tin rác                                              | Bộ lọc lỏng                                         | Nhắn:`Loại hết tin từ công ty outsourcing và headhunt, chỉ giữ product company, ngân hàng, fintech` |
 | Quá ít tin                                                      | Alert Gmail chưa về hoặc filter chưa gắn label    | Xem Bước 3b.4                                                                                                 |
 | Toàn tin senior                                                  | Chưa lọc YOE                                         | Nhắn:`Chỉ giữ tin yêu cầu dưới 3 năm kinh nghiệm`                                                    |
+| Cuối email không có dòng `Skill: v3.3` hoặc số khác          | Spark đang chạy bản skill cũ                       | Dán lại `SKILL.md` vào skill đã có (Bước 4), không tạo skill mới                                        |
 | Thứ Hai không có email dọn dẹp                               | Task 3 chưa có lịch hoặc bị pause                 | Work panel → Schedules của Task 3                                                                             |
 | Cùng 1 tin hiện 2–3 dòng                                      | Gộp theo`company\|title` chưa chạy                 | Nhắn:`Gộp các tin cùng công ty và cùng tiêu đề thành 1 dòng theo Bước 5 của skill`             |
 
@@ -444,6 +447,7 @@ Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
 > - Career page lỗi: không có
 > - Đã mở 12 JD, bỏ qua 0 tin vì chạm trần
 > - SEEN_COUNT: 2.310
+> - Skill: v3.3
 >
 > 📋 Link tới Google Sheet: [Job Radar Tracker](#) — tab `jobs_detail` có đủ mọi tin từ trước tới nay, tab `archive` có tin cũ hơn 90 ngày.
 
