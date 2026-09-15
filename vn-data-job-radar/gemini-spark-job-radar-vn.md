@@ -213,8 +213,8 @@ Trong lúc chờ, mở **work panel** (bấm chip tiến độ ở đầu thread
 
 1. ☑ Tab `seen_urls` có URL mới, **không có URL nào chứa `?utm`, `?ref=`, `trackingId`**
 2. ☑ Tab `jobs_detail` có dòng đầy đủ 9 cột (cột I `alias_urls` thường rỗng); cột `first_sent_at` dạng `2026-09-12T09:03:00+07:00`; cột `role_group` chỉ có `DA/AE/DE/BI/BA`
-3. ☑ Email đã về, link bấm được, công ty ưu tiên có ⭐
-4. ☑ Cuối email có dòng `SEEN_COUNT` (lần đầu = 0 là đúng) và dòng "nguồn không truy cập được"
+3. ☑ Email đã về, link "Xem tin" bấm được, công ty ưu tiên có ⭐ trước tên
+4. ☑ Cuối email có khối "Báo cáo lần chạy" đủ 5 dòng, `SEEN_COUNT` lần đầu = 0 là đúng, và dòng **Link tới Google Sheet** mở đúng file `Job Radar Tracker`
 5. ☑ Mở đầu email **không** ghi "đang dùng thành phố mặc định" (nếu có → Task chưa truyền `city` đúng)
 
 Nếu thiếu mục nào, xem [Phần 5](#phần-5--xử-lý-sự-cố). Mẫu email đúng ở [Phần 3](#phần-3--email-nhận-được-trông-thế-nào).
@@ -322,16 +322,16 @@ Nội dung skill nằm trong file **`SKILL.md`** cùng thư mục. Không chép 
 
 Tóm tắt luồng để bạn đối chiếu khi đọc work panel. Task quét (`mode: full` / `quick`) đi từ Bước 1 → 8. Task dọn dẹp (`mode: cleanup`) **bỏ qua toàn bộ** 8 bước đó, chỉ làm mục cuối bảng.
 
-| Bước trong skill    | Việc làm                                                                                                                                                              |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1                     | Đọc`seen_urls` cột A → SEEN, đếm `SEEN_COUNT`                                                                                                                 |
-| 2                     | Đọc 5 Gmail label, trích URL job                                                                                                                                     |
-| 3                     | Quét web: Xóm Jobs → LinkedIn → TopCV → ITviec → VietnamWorks → career page ưu tiên (mode`quick`: chỉ Xóm Jobs + LinkedIn)                                        |
-| 4                     | Từ khoá 5 nhóm vị trí                                                                                                                                              |
-| 5                     | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                                                                  |
-| 6                     | Mở JD từng tin lấy Lương / YOE / Stack (trần: full 40 tin, quick 20 tin)                                                                                        |
-| 7                     | Ghi`jobs_detail` trước, rồi `seen_urls` (cả URL chính lẫn `alias_urls`)                                                                                    |
-| 8                     | Gửi email HTML                                                                                                                                                         |
+| Bước trong skill    | Việc làm                                                                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1                     | Đọc`seen_urls` cột A → SEEN, đếm `SEEN_COUNT`                                                                                                                                  |
+| 2                     | Đọc 5 Gmail label, trích URL job                                                                                                                                                      |
+| 3                     | Quét web: Xóm Jobs → LinkedIn → TopCV → ITviec → VietnamWorks → career page ưu tiên (mode`quick`: chỉ Xóm Jobs + LinkedIn)                                                  |
+| 4                     | Từ khoá 5 nhóm vị trí                                                                                                                                                               |
+| 5                     | Lọc 72h / thành phố / không trong SEEN; gộp trùng theo`company\|title`; lọc BA                                                                                                   |
+| 6                     | Mở JD từng tin lấy Lương / YOE / Stack (trần: full 40 tin, quick 20 tin)                                                                                                           |
+| 7                     | Ghi`jobs_detail` trước, rồi `seen_urls` (cả URL chính lẫn `alias_urls`)                                                                                                      |
+| 8                     | Gửi email HTML theo khung cố định, cuối email có link tới sheet                                                                                                                   |
 | **`cleanup`** | Task riêng, T2 07:00: đọc`jobs_detail`, archive dòng >90 ngày (guard: ≥50 dòng, tối đa 30% mỗi lần), xoá URL tương ứng khỏi `seen_urls`, gửi email báo cáo riêng |
 
 ---
@@ -416,34 +416,39 @@ Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
 
 > Sáng nay có 12 tin mới, nhiều nhất là Data Engineer (5 tin). Đáng chú ý: Techcombank mở cùng lúc 3 vị trí Data Platform, stack Spark + Airflow.
 >
-> **Data Analyst**
+> **Data Analyst (2 tin)**
 >
-> | ⭐ | Vị trí            | Công ty | Lương       | YOE | Stack chính                  | Ngày đăng | Link    |
-> | -- | ------------------- | -------- | ------------- | --- | ----------------------------- | ------------ | ------- |
-> | ⭐ | Senior Data Analyst | MoMo     | Thoả thuận  | 3   | SQL, Python, Looker, BigQuery | 2026-09-14   | Xem tin |
-> |    | Product Analyst     | Base.vn  | 20–28 triệu | 2   | SQL, Metabase, Excel          | 2026-09-13   | Xem tin |
+> | Vị trí            | Công ty | Lương       | YOE | Stack chính                  | Ngày đăng | Link    |
+> | ------------------- | -------- | ------------- | --- | ----------------------------- | ------------ | ------- |
+> | Senior Data Analyst | ⭐ MoMo  | Thoả thuận  | 3   | SQL, Python, Looker, BigQuery | 2026-09-14   | Xem tin |
+> | Product Analyst     | Base.vn  | 20–28 triệu | 2   | SQL, Metabase, Excel          | 2026-09-13   | Xem tin |
 >
-> **Data Engineer**
+> **Data Engineer (5 tin)**
 >
 > *(bảng tương tự)*
 >
-> **Business Analyst**
+> **Business Analyst (2 tin)**
 >
-> | ⭐ | Vị trí | Công ty | ... |
-> | | Business Analyst (BA thiên data) | VNPAY | ... |
-> | | IT Business Analyst (IT BA thuần) | FPT IS | ... |
+> | Vị trí                            | Công ty | ... |
+> | ----------------------------------- | -------- | --- |
+> | Business Analyst — BA thiên data  | VNPAY    | ... |
+> | IT Business Analyst — IT BA thuần | FPT IS   | ... |
 >
 > ---
 >
+> **Báo cáo lần chạy**
+>
 > - Nguồn không truy cập được: LinkedIn (tường đăng nhập), TopCV (captcha)
-> - Nguồn chạm trần: ITviec (30 tin, còn tin chưa quét — lần sau bắt tiếp)
-> - Career page lỗi: VinBigData (timeout)
+> - Nguồn chạm trần: ITviec (30 tin, còn tin chưa quét)
+> - Career page lỗi: không có
 > - Đã mở 12 JD, bỏ qua 0 tin vì chạm trần
 > - SEEN_COUNT: 2.310
+>
+> 📋 Link tới Google Sheet: [Job Radar Tracker](#) — tab `jobs_detail` có đủ mọi tin từ trước tới nay, tab `archive` có tin cũ hơn 90 ngày.
 
-Những gì **không** xuất hiện: section không có tin (bỏ hẳn), URL trần, lương suy đoán.
+Những gì **không** xuất hiện: section không có tin (bỏ hẳn), cột ⭐ riêng (⭐ nằm trước tên công ty), URL trần, lương suy đoán, màu sắc hay CSS. Khối báo cáo luôn đủ 5 dòng — dòng nào không có gì thì ghi "không có".
 
-**Khi không có tin mới:** tiêu đề `[Job Radar] Hà Nội — không có tin mới`, thân email 1 dòng + `SEEN_COUNT`.
+**Khi không có tin mới:** tiêu đề `[Job Radar] Hà Nội — không có tin mới`, thân email 1 dòng rồi vẫn có khối báo cáo và link sheet như trên.
 
 ## Email dọn dẹp (Task 3, thứ Hai)
 
@@ -455,15 +460,17 @@ Những gì **không** xuất hiện: section không có tin (bỏ hẳn), URL t
 > seen_urls: 2.310 → 2.041 URL
 > archive: tổng 213 dòng
 > Dòng cũ nhất còn lại trong jobs_detail: 2026-09-16
+>
+> 📋 Link tới Google Sheet: [Job Radar Tracker](#)
 
 Năm trạng thái có thể gặp:
 
 | Tiêu đề  | Khi nào                                                                                                         | Bạn cần làm gì                                                                   |
 | ----------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `SKIPPED` | `jobs_detail` < 50 dòng, hoặc không dòng nào quá 90 ngày. **~3 tháng đầu sẽ toàn thế này** | Không                                                                               |
-| `DONE`    | Dọn thành công, không còn dòng nào chờ                                                                | Lần đầu thấy DONE thì mở sheet liếc qua cho chắc                             |
-| `PARTIAL` | Số dòng cần dọn vượt trần 30% mỗi lần → dọn 30% cũ nhất, phần còn lại để tuần sau        | Không. Vài tuần nữa nó tự về`DONE`                                          |
-| `BLOCKED` | Số dòng cần dọn > 80% tổng — bất thường, thường là`first_sent_at` hỏng định dạng      | Mở sheet kiểm tra cột`first_sent_at` (Phần 5)                                |
+| `DONE`    | Dọn thành công, không còn dòng nào chờ                                                                   | Lần đầu thấy DONE thì mở sheet liếc qua cho chắc                             |
+| `PARTIAL` | Số dòng cần dọn vượt trần 30% mỗi lần → dọn 30% cũ nhất, phần còn lại để tuần sau             | Không. Vài tuần nữa nó tự về`DONE`                                          |
+| `BLOCKED` | Số dòng cần dọn > 80% tổng — bất thường, thường là`first_sent_at` hỏng định dạng               | Mở sheet kiểm tra cột`first_sent_at` (Phần 5)                                  |
 | `FAILED`  | Append vào`archive` xong nhưng đếm không khớp → dừng trước khi xoá                                  | Xoá dòng vừa append trong`archive`, chạy lại (Phần 5). Không mất dữ liệu |
 
 Email dọn dẹp **luôn gửi**, kể cả `SKIPPED`, để bạn biết task còn sống.

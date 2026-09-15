@@ -328,22 +328,56 @@ Gửi tới email của user. Dùng HTML, không dùng markdown thô.
 
 **Tiêu đề:** `[Job Radar] {Thành phố} — {N} tin mới — {dd/MM HH:mm}`
 
-**Thân email:**
+**Thân email** — dựng đúng theo khung dưới đây. Thay phần trong `{}`; các hàng
+trong bảng chỉ là ví dụ minh hoạ định dạng.
 
-Mở đầu 2–3 câu: tổng số tin mới, nhóm vị trí nào nhiều nhất, và một nhận xét
-đáng chú ý (công ty lớn mở nhiều slot, mức lương bất thường, xu hướng tech stack).
-Nếu `city` đang dùng giá trị mặc định, nói rõ ở đây.
+```html
+<p>{Mở đầu 2–3 câu: tổng số tin mới, nhóm vị trí nào nhiều nhất, một nhận xét đáng chú ý
+— công ty lớn mở nhiều slot, mức lương bất thường, xu hướng stack.
+Nếu city đang dùng giá trị mặc định, nói rõ ở đây.}</p>
 
-Sau đó chia 5 section theo thứ tự: Data Analyst → Analytics Engineer →
-Data Engineer → Business Intelligence → Business Analyst.
-**Bỏ hẳn section nào không có tin mới** — đừng viết "không có tin".
+<h3>Data Analyst ({n} tin)</h3>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">
+  <tr><th>Vị trí</th><th>Công ty</th><th>Lương</th><th>YOE</th><th>Stack chính</th><th>Ngày đăng</th><th>Link</th></tr>
+  <tr><td>Senior Data Analyst</td><td>⭐ MoMo</td><td>Thoả thuận</td><td>3</td><td>SQL, Python, Looker, BigQuery</td><td>2026-09-14</td><td><a href="{job_url}">Xem tin</a></td></tr>
+  <tr><td>Product Analyst</td><td>Base.vn</td><td>20–28 triệu</td><td>2</td><td>SQL, Metabase, Excel</td><td>2026-09-13</td><td><a href="{job_url}">Xem tin</a></td></tr>
+</table>
 
-Mỗi section là một bảng:
+<h3>Analytics Engineer ({n} tin)</h3>
+<!-- bảng cùng cấu trúc -->
 
-| ⭐ | Vị trí | Công ty | Lương | YOE | Stack chính | Ngày đăng | Link |
+<h3>Data Engineer ({n} tin)</h3>
+<!-- bảng cùng cấu trúc -->
 
-- **⭐:** đánh dấu nếu công ty nằm trong danh sách **công ty ưu tiên** (khớp theo quy tắc
-  ở Bước 3). Để trống nếu không
+<h3>Business Intelligence ({n} tin)</h3>
+<!-- bảng cùng cấu trúc -->
+
+<h3>Business Analyst ({n} tin)</h3>
+<!-- bảng cùng cấu trúc; cột Vị trí ghi thêm loại, ví dụ "Business Analyst — BA thiên data" -->
+
+<hr>
+<p><b>Báo cáo lần chạy</b></p>
+<ul>
+  <li>Nguồn không truy cập được: {LinkedIn (tường đăng nhập), TopCV (captcha) | không có}</li>
+  <li>Nguồn chạm trần: {ITviec (30 tin, còn tin chưa quét) | không có}</li>
+  <li>Career page lỗi: {VinBigData (timeout) | không có}</li>
+  <li>Đã mở {n} JD, bỏ qua {m} tin vì chạm trần</li>
+  <li>SEEN_COUNT: {SEEN_COUNT}</li>
+</ul>
+<p>📋 Link tới Google Sheet: <a href="{url của sheet}">Job Radar Tracker</a> — tab <code>jobs_detail</code> có đủ mọi tin từ trước tới nay, tab <code>archive</code> có tin cũ hơn 90 ngày.</p>
+```
+
+**Quy tắc dựng:**
+
+- Dùng đúng các thẻ và thứ tự trong khung. **Không** thêm CSS, màu nền, font, ảnh,
+  `<div>`/`<span>` hay bất kỳ thẻ nào khác — Gmail bỏ phần lớn CSS, và email nào cũng
+  phải trông giống nhau
+- Thứ tự section cố định: Data Analyst → Analytics Engineer → Data Engineer →
+  Business Intelligence → Business Analyst. **Section không có tin thì bỏ hẳn** cả `<h3>`
+  lẫn bảng — đừng viết "không có tin"
+- Trong mỗi bảng: tin ⭐ xếp lên đầu, sau đó theo `posted_date` mới nhất trước
+- **Công ty:** thêm `⭐ ` trước tên nếu công ty nằm trong danh sách **công ty ưu tiên**
+  (khớp theo quy tắc ở Bước 3). Không có cột ⭐ riêng
 - **Lương:** ba trường hợp, không có trường hợp thứ tư:
   - Tin ghi con số / khoảng → chép đúng như tin đăng (giữ đơn vị, ví dụ `25–35 triệu`, `$1,500–2,000`)
   - Tin ghi "Thoả thuận" / "Negotiable" / "Cạnh tranh" → ghi `Thoả thuận`
@@ -351,22 +385,19 @@ Mỗi section là một bảng:
 - **YOE:** số năm kinh nghiệm yêu cầu; không nhắc → `không rõ`
 - **Stack chính:** tối đa 4 công nghệ nổi bật nhất trong JD
 - **Ngày đăng:** `yyyy-MM-dd` hoặc `không rõ`
-- **Link:** anchor text ngắn "Xem tin", không dán URL trần
-
-**Cuối email**, ghi các dòng báo cáo:
-
-- Nguồn nào KHÔNG truy cập được lần này (captcha, lỗi, tường đăng nhập)
-- Nguồn nào **chạm trần** (3 trang / 30 tin / 3 phút) — tin còn lại sẽ bắt ở lần chạy sau
-- Career page nào lỗi hoặc đổi cấu trúc
-- Số JD đã mở / số tin bỏ qua vì chạm trần ở Bước 6
-- `SEEN_COUNT`: số URL đã đọc được từ `seen_urls` ở Bước 1
-
-Dòng `SEEN_COUNT` là để user tự kiểm tra bộ nhớ chống trùng còn sống. Nếu con số này
-đột nhiên về 0 trong khi trước đó vẫn lớn, tức là có lỗi.
+- **Link:** anchor text ngắn "Xem tin" trỏ tới `job_url`, không dán URL trần
+- **Vị trí (nhóm BA):** ghi thêm ` — BA thiên data` hoặc ` — IT BA thuần` sau tên vị trí,
+  theo kết quả Bước 5
+- **Khối báo cáo:** đủ 5 dòng, đúng thứ tự, luôn có mặt; dòng nào không có gì thì ghi
+  `không có`, không bỏ dòng. `SEEN_COUNT` là để user tự kiểm tra bộ nhớ chống trùng còn
+  sống — nếu đột nhiên về 0 trong khi trước đó vẫn lớn, tức là có lỗi
+- **Link sheet:** trỏ tới đúng file `Job Radar Tracker` đã mở ở Bước 1. Không bịa URL
 
 **Nếu không có tin mới nào:** vẫn gửi email, tiêu đề
-`[Job Radar] {Thành phố} — không có tin mới`, thân email 1 dòng kèm `SEEN_COUNT`.
-Để user biết hệ thống vẫn chạy chứ không phải đã chết.
+`[Job Radar] {Thành phố} — không có tin mới`. Thân email chỉ gồm một dòng
+`<p>Không có tin mới trong 72 giờ qua tại {Thành phố}.</p>`, rồi `<hr>`, khối báo cáo
+và link sheet y như khung trên. Để user biết hệ thống vẫn chạy chứ không phải đã chết,
+và nhìn khối báo cáo là biết "không có tin" là thật hay do nguồn hỏng.
 
 ## Chế độ `cleanup` — Dọn dẹp hàng tuần (task riêng)
 
@@ -416,7 +447,8 @@ tác được** trên sheet. Vì vậy phải qua đủ các guard dưới đây
 
 **Tiêu đề:** `[Job Radar] Dọn dẹp tuần — {DONE|PARTIAL|SKIPPED|BLOCKED|FAILED} — {dd/MM}`
 
-**Thân email** (HTML, ngắn, không có bảng job):
+**Thân email** (HTML, ngắn, không có bảng job): một `<p>` mở đầu nếu cần, rồi một `<ul>`
+mỗi mục một `<li>` theo đúng thứ tự dưới, cuối cùng là dòng link sheet. Không thêm thẻ khác.
 
 - Kết quả: `DONE` / `PARTIAL` / `SKIPPED` / `BLOCKED` / `FAILED` + lý do (nếu không phải `DONE`)
 - Đã archive: `{|BATCH_SET|}` dòng (0 nếu không dọn)
@@ -427,6 +459,7 @@ tác được** trên sheet. Vì vậy phải qua đủ các guard dưới đây
 - URL giữ lại vì tin không có ngày đăng: `{KEPT_URLS}` (chỉ ghi nếu > 0)
 - Dòng lỗi định dạng ngày bị bỏ qua: `{BAD_ROWS}` (chỉ ghi nếu > 0)
 - Dòng cũ nhất còn lại trong `jobs_detail`: `{first_sent_at nhỏ nhất}`
+- Dòng cuối, ngoài `<ul>`: `<p>📋 Link tới Google Sheet: <a href="{url của sheet}">Job Radar Tracker</a></p>`
 
 **Luôn gửi email**, kể cả `SKIPPED` — để user biết task còn sống. Với `BLOCKED` và `FAILED`,
 mở đầu email bằng một câu nói rõ cần user vào sheet kiểm tra.
