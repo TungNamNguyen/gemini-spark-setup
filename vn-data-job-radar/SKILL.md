@@ -4,7 +4,7 @@ description: Quét các trang tuyển dụng Việt Nam tìm tin tuyển dụng 
 ---
 # VN Data Job Radar
 
-**Phiên bản skill: 3.3.** Luôn ghi số này vào dòng `Skill:` trong khối báo cáo cuối email,
+**Phiên bản skill: 3.4.** Luôn ghi số này vào dòng `Skill:` trong khối báo cáo cuối email,
 để user biết task đang chạy đúng bản skill mới nhất.
 
 ## Mục tiêu
@@ -20,6 +20,31 @@ Tìm các tin tuyển dụng ngành dữ liệu **đăng trong 72 giờ gần nh
 | `mode` | `full` \| `quick` \| `cleanup` | `full`     | `full` = quét đủ Gmail + 5 nguồn web + career page. `quick` = chỉ Gmail + Xóm Jobs + LinkedIn (cửa sổ 24 giờ), bỏ career page — dùng cho buổi chiều. `cleanup` = **không quét gì**, chỉ dọn dẹp sheet và gửi email báo cáo riêng — xem mục "Chế độ cleanup" |
 
 Không hỏi lại user khi thiếu tham số — skill chạy tự động, không có ai trả lời.
+
+## Quy tắc tự chủ — KHÔNG BAO GIỜ dừng chờ user
+
+Skill này chạy theo lịch lúc user offline. Mọi lần dừng để hỏi đều đồng nghĩa với
+một lần chạy bị mất. Vì vậy, trong suốt task:
+
+- **Không hỏi bất kỳ câu nào** — không hỏi xác nhận, không hỏi "có tiếp tục không",
+  không hỏi tham số. Thiếu gì thì dùng mặc định và ghi vào khối báo cáo cuối email
+- **Không yêu cầu "take control"** / không đề nghị user đăng nhập hộ. Gặp trang đăng
+  nhập, captcha, mật khẩu → ghi nguồn đó là "không truy cập được" và đi tiếp ngay
+- **Không tự đoán hay tự tìm domain mới** (không gõ vào Google "X careers page" rồi
+  mở kết quả). Chỉ mở đúng những domain đã liệt kê sẵn trong skill: 5 nguồn chính ở
+  Bước 3 (`jobs.xomdata.com`, `linkedin.com`, `itviec.com`, `vietnamworks.com`,
+  `topcv.vn`), `google.com` (Gmail/Sheets), và đúng các URL trong bảng "Công ty ưu
+  tiên" ở mục 3.6. Danh sách này cố định — không đổi giữa các lần chạy, nên không
+  phát sinh domain lạ để Spark phải hỏi lại. Link gốc từ Xóm Jobs chỉ **đọc ra từ
+  text trang**, không click sang. Thiếu thông tin vì không mở được trang → ghi
+  `không rõ`, không đi tìm ở domain khác
+- **Không dùng Chrome local** dù đang được phép — chỉ remote browser
+- Gặp lỗi ở một nguồn → ghi nhận, đi tiếp nguồn sau. Gặp lỗi ở bước ghi sheet →
+  vẫn gửi email, nói rõ bước nào lỗi. Chỉ dừng hẳn khi không đọc được `seen_urls`
+  (vì khi đó không thể chống trùng)
+
+Những thứ platform bắt buộc xác nhận (gửi email, duyệt danh sách site) nằm ngoài
+tầm skill — không cố lách, cứ làm đúng bước và để hệ thống hỏi.
 
 Lọc trùng ở mode `full` và `quick` đều dựa vào `seen_urls`. **Không** lọc theo "tin đăng kể từ lần
 chạy trước" — chỉ cần URL chưa có trong SEEN là gửi.
@@ -281,14 +306,50 @@ user**, kể cả khi máy đang mở — skill chạy tự động theo lịch 
 máy cá nhân. Nếu gặp captcha hoặc tường đăng nhập, ghi nhận nguồn đó là "không truy cập
 được" và đi tiếp — không dừng cả task vì một nguồn.
 
-### Công ty ưu tiên
+### 3.6 Công ty ưu tiên — career page cố định
 
-Sau khi quét 5 nguồn chính, quét thêm trang tuyển dụng (career page) của các
-công ty dưới đây. Chỉ tìm vị trí liên quan đến data/analytics.
+Sau khi quét 5 nguồn chính, mở thêm **đúng các URL đã cho sẵn** dưới đây. Chỉ tìm
+vị trí liên quan đến data/analytics. **Không tự tìm URL khác** cho công ty nào —
+nếu URL dưới đây lỗi/đổi cấu trúc thì bỏ qua công ty đó, ghi vào báo cáo cuối
+email, không gõ tên công ty vào Google để tìm trang thay thế.
 
-NAB Innovation Centre Vietnam, Crossian, VNG, Grab Vietnam, Shopee Vietnam,
-MoMo, ZaloPay, VNPAY, Techcombank, VPBank, MB Bank, Vingroup, VinAI, VinBigData,
-One Mount, Be Group, Lazada Vietnam, GreenSM.
+**Quét hết toàn bộ trang, không dừng ở lần tải đầu tiên:** nếu trang có nút "xem
+thêm" / "load more" / phân trang (trang 2, 3…), bấm và cuộn tiếp cho đến khi
+không còn tin mới hoặc chạm trần dưới đây — đừng bỏ sót phần dưới của danh sách
+chỉ vì lần tải đầu đã có vài tin. Trần cho mỗi công ty (chạm cái nào trước thì
+dừng công ty đó, đi tiếp công ty sau, ghi vào báo cáo là "chạm trần"):
+
+- Tối đa **5 lần bấm "xem thêm"/chuyển trang**
+- Hoặc tối đa **60 tin** đã trích xuất từ công ty đó
+- Hoặc tối đa **2 phút** cho một công ty
+
+Việc này áp dụng cho toàn bộ 16 dòng trong bảng — kể cả các trang tôi đã kiểm tra
+trước (VNG, Grab…), vì công cụ tôi dùng để verify chỉ đọc được lần tải đầu tiên,
+không bấm/cuộn được, nên số tin tôi thấy khi verify **chưa chắc là toàn bộ**.
+
+| Công ty                                  | URL career page                                                                                                                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| VNG                                       | `https://career.vng.com.vn/job-search`                                                                                                                                          |
+| Grab Vietnam                              | `https://careers.smartrecruiters.com/Grab?search=Vietnam`                                                                                                                       |
+| Shopee Vietnam                            | `https://careers.shopee.vn/jobs?region_id=33,34&limit=50&offset=0`                                                                                                              |
+| MoMo                                      | `https://momo.careers/jobs-opening`                                                                                                                                             |
+| VNPAY                                     | `https://tuyendung.vnpay.vn/co-hoi-nghe-nghiep?page=1`                                                                                                                          |
+| Techcombank                               | `https://www.techcombankjobs.com/search/?createNewAlert=false&q=&locationsearch=`                                                                                               |
+| VPBank (URL đã lọc sẵn 3 khối CNTT/Dữ liệu/Rủi ro) | `https://tuyendung.vpbank.com.vn/search/?q=&facetFilters=%7B%22businessUnit_obj%22%3A%5B%22Kh%E1%BB%91i+C%C3%B4ng+ngh%E1%BB%87+th%C3%B4ng+tin%22%2C%22Kh%E1%BB%91i+Qu%E1%BA%A3n+tr%E1%BB%8B+v%C3%A0+Ph%C3%A2n+t%C3%ADch+d%E1%BB%AF+li%E1%BB%87u%22%2C%22Kh%E1%BB%91i+Qu%E1%BA%A3n+tr%E1%BB%8B+r%E1%BB%A7i+ro%22%5D%7D&pageNumber=0` |
+| MB Bank                                   | `https://careers.mbbank.com.vn/list-of-posts`                                                                                                                                   |
+| One Mount                                 | `https://careers.onemount.com/jobs`                                                                                                                                             |
+| Be Group                                  | `https://be.com.vn/ve-be/tuyen-dung/`                                                                                                                                           |
+| GreenSM                                   | `https://www.greensm.com/vn-vi/career`                                                                                                                                          |
+| NAB Innovation Centre Vietnam             | `https://itviec.com/companies/nab-innovation-centre-vietnam`                                                                                                                    |
+| NAB Innovation Centre Vietnam (nguồn 2)   | `https://nab.eightfold.ai/careers?start=0&location=Vietnam&sort_by=distance&filter_include_remote=1&filter_include_relocation=0`                                               |
+| Crossian                                  | `https://crossian.com/careers/`                                                                                                                                                 |
+| Zalo (gồm cả ZaloPay)                     | `https://zalo.careers/job-list?page=1`                                                                                                                                          |
+| Vingroup                                  | `https://tuyendung.vingroup.net/jobs`                                                                                                                                           |
+
+
+**URL trên tra cứu tại thời điểm viết skill, có thể đổi theo thời gian.** Lần chạy
+test đầu tiên, kiểm tra từng URL còn mở được danh sách job không; URL nào lỗi thì
+user tự thay bằng URL đúng, sửa trực tiếp bảng này trong Skill.
 
 **Cách khớp tên công ty (dùng cho cả việc đánh ⭐):** tin đăng thật hiếm khi ghi đúng
 tên trong danh sách. Trước khi so khớp, chuẩn hoá cả hai phía: lowercase, bỏ dấu, bỏ
@@ -482,10 +543,10 @@ Nếu city đang dùng giá trị mặc định, nói rõ ở đây.}</p>
 <ul>
   <li>Nguồn không truy cập được: {TopCV (captcha), LinkedIn (IP bị chặn) | không có}</li>
   <li>Nguồn chạm trần: {ITviec (30 tin, còn tin chưa quét) | không có}</li>
-  <li>Career page lỗi: {VinBigData (timeout) | không có}</li>
+  <li>Career page lỗi: {One Mount (timeout) | không có}</li>
   <li>Đã mở {n} JD, bỏ qua {m} tin vì chạm trần</li>
   <li>SEEN_COUNT: {SEEN_COUNT}</li>
-  <li>Skill: v3.3</li>
+  <li>Skill: v3.4</li>
 </ul>
 <p>📋 Link tới Google Sheet: <a href="{url của sheet}">Job Radar Tracker</a> — tab <code>jobs_detail</code> có đủ mọi tin từ trước tới nay, tab <code>archive</code> có tin cũ hơn 90 ngày.</p>
 ```

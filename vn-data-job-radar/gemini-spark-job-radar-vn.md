@@ -1,6 +1,6 @@
 # Gemini Spark — Job Radar cho ngành Data (Hà Nội / TP.HCM)
 
-**Phiên bản 3.3** — cấu trúc Sheet 3 tab, LinkedIn quét qua endpoint guest (không cần đăng nhập), Gmail Job Alerts là nguồn chính cho TopCV, remote browser, task dọn dẹp tách riêng, kèm hướng dẫn setup từng bước.
+**Phiên bản 3.4** — cấu trúc Sheet 3 tab, LinkedIn quét qua endpoint guest (không cần đăng nhập), Gmail Job Alerts là nguồn chính cho TopCV, remote browser, task dọn dẹp tách riêng, quy tắc tự chủ (không dừng chờ user giữa task), 16 URL career page cố định quét hết toàn bộ trang, kèm hướng dẫn setup từng bước.
 
 Thời gian setup: **2 ngày**, tổng khoảng 60 phút thao tác.
 Ngày 1 (~45 phút): Bước 1 → 3b.2. Ngày 2 (~15 phút + 25 phút chờ test): Bước 3b.3 → 9, sau khi email alert đầu tiên đã về.
@@ -33,7 +33,7 @@ Sau khi setup xong, bạn sẽ có đúng những thứ sau:
 | Gmail filter | 5             | Mỗi filter gắn 1 label theo người gửi                                                                | 3b             |
 | Spark Skill  | 1             | `vn-data-job-radar` (từ file `SKILL.md`)                                                             | 4              |
 | Spark Task   | 3             | Hà Nội · TP.HCM · Dọn dẹp                                                                           | 5, 8, 8b       |
-| Schedule     | 5             | HN 08:00 full / 17:30 quick · HCM 08:20 full / 17:50 quick · Dọn dẹp T2 07:00                         | 9              |
+| Schedule     | 5             | HN 08:00 full / 17:30 quick · HCM 09:30 full / 17:50 quick · Dọn dẹp T2 07:00                         | 9              |
 
 Email bạn nhận mỗi ngày: **4 email** (2 thành phố × sáng/chiều). Thứ Hai thêm **1 email dọn dẹp**.
 
@@ -187,7 +187,7 @@ Kiểm tra: quay lại trang Skills, phải thấy skill tên `vn-data-job-radar
 
 > Từ bản 3, nội dung skill **chỉ nằm trong `SKILL.md`**, không chép lại vào tài liệu này nữa để tránh hai bản lệch nhau. Sửa skill thì sửa `SKILL.md` rồi dán lại vào Spark.
 >
-> **Cập nhật skill đã có:** Spark không đọc file trên máy hay trên git, và nhắn "dùng skill mới nhất" vào thread cũng không có tác dụng. Vào **Spark → Skills → mở skill `vn-data-job-radar` → Edit**, xoá hết nội dung cũ, dán toàn bộ `SKILL.md` mới, Lưu. **Không** tạo skill thứ hai cùng tên — Spark sẽ không biết chọn cái nào. Sau khi dán, chạy tay 1 lần và nhìn dòng `Skill: v3.3` ở cuối email: khớp số ở đầu `SKILL.md` là đã nhận bản mới.
+> **Cập nhật skill đã có:** Spark không đọc file trên máy hay trên git, và nhắn "dùng skill mới nhất" vào thread cũng không có tác dụng. Vào **Spark → Skills → mở skill `vn-data-job-radar` → Edit**, xoá hết nội dung cũ, dán toàn bộ `SKILL.md` mới, Lưu. **Không** tạo skill thứ hai cùng tên — Spark sẽ không biết chọn cái nào. Sau khi dán, chạy tay 1 lần và nhìn dòng `Skill: v3.4` ở cuối email: khớp số ở đầu `SKILL.md` là đã nhận bản mới.
 
 ## Bước 5 — Tạo Task đầu tiên (3 phút)
 
@@ -211,13 +211,18 @@ Lần chạy đầu Spark sẽ hỏi vài thứ. Xử lý như sau:
 
 Trong lúc chờ, mở **work panel** (bấm chip tiến độ ở đầu thread) để xem nó đang ở bước nào.
 
-**Sau khi xong, kiểm tra 5 thứ:**
+**Sau khi xong, kiểm tra 6 thứ:**
 
 1. ☑ Tab `seen_urls` có URL mới, **không có URL nào chứa `?utm`, `?ref=`, `trackingId`**
 2. ☑ Tab `jobs_detail` có dòng đầy đủ 9 cột (cột I `alias_urls` thường rỗng); cột `first_sent_at` dạng `2026-09-12T09:03:00+07:00`; cột `role_group` chỉ có `DA/AE/DE/BI/BA`
 3. ☑ Email đã về, link "Xem tin" bấm được, công ty ưu tiên có ⭐ trước tên
 4. ☑ Cuối email có khối "Báo cáo lần chạy" đủ 5 dòng, `SEEN_COUNT` lần đầu = 0 là đúng, và dòng **Link tới Google Sheet** mở đúng file `Job Radar Tracker`
 5. ☑ Mở đầu email **không** ghi "đang dùng thành phố mặc định" (nếu có → Task chưa truyền `city` đúng)
+6. ☑ Đọc phần "Career page lỗi" trong khối báo cáo — 16 URL career page (15 công ty,
+   riêng NAB có 2 nguồn) ở
+   mục 3.6 trong Skill là tra cứu sẵn, có thể đã đổi. Công ty nào báo lỗi thì mở thử
+   URL đó bằng tay, thay URL đúng vào bảng trong Skill (Menu → Spark → Skills →
+   `vn-data-job-radar` → Edit)
 
 Nếu thiếu mục nào, xem [Phần 5](#phần-5--xử-lý-sự-cố). Mẫu email đúng ở [Phần 3](#phần-3--email-nhận-được-trông-thế-nào).
 
@@ -278,7 +283,7 @@ Tạo lịch: mỗi ngày lúc 08:00 giờ Việt Nam, chạy với mode: full.
 Tạo lịch: mỗi ngày lúc 17:30 giờ Việt Nam, chạy với mode: quick.
 ```
 
-**Task TP.HCM:** giống hệt, đổi giờ thành **08:20** và **17:50**.
+**Task TP.HCM:** giống hệt, đổi giờ thành **09:30** và **17:50**.
 
 **Task Dọn dẹp** (chỉ 1 câu):
 
@@ -286,7 +291,12 @@ Tạo lịch: mỗi ngày lúc 17:30 giờ Việt Nam, chạy với mode: quick.
 Tạo lịch: mỗi thứ Hai lúc 07:00 giờ Việt Nam, chạy với mode: cleanup.
 ```
 
-Lệch 20 phút giữa hai task quét để không chạy chồng nhau — task `full` sáng có thể mất hơn 15 phút vì quét toàn bộ career page ưu tiên. Task dọn dẹp chạy **07:00, trước cả hai task quét** một tiếng, để không có task nào đọc/ghi sheet trong lúc nó xoá dòng.
+Lệch **90 phút** giữa hai task `full` để không chạy chồng nhau — mode `full` giờ quét
+5 nguồn chính **cộng thêm 16 URL career page**, mỗi career page có thể lật nhiều trang
+(trần 2 phút/công ty), nên một lần chạy `full` có thể mất 30–45 phút, không còn là
+~15 phút như trước. Hai task `quick` (17:30/17:50) không quét career page nên nhẹ hơn
+nhiều, giữ nguyên cách nhau 20 phút là đủ. Task dọn dẹp chạy **07:00, trước cả hai task
+quét sáng**, để không có task nào đọc/ghi sheet trong lúc nó xoá dòng.
 
 > Vì dùng remote browser nên không cần máy bật đúng giờ — chọn giờ nào cũng được. 08:00 để email có trước giờ làm.
 
@@ -405,7 +415,7 @@ Chưa đặt lịch. Chạy ngay một lần bây giờ để tôi kiểm tra.
 | Task      | Sáng (`mode: full`) | Chiều (`mode: quick`) | Thứ Hai (`mode: cleanup`) |
 | --------- | ---------------------- | ------------------------ | ---------------------------- |
 | Hà Nội  | 08:00                  | 17:30                    | —                           |
-| TP.HCM    | 08:20                  | 17:50                    | —                           |
+| TP.HCM    | 09:30                  | 17:50                    | —                           |
 | Dọn dẹp | —                     | —                       | 07:00                        |
 
 ---
@@ -447,7 +457,7 @@ Dùng để đối chiếu khi test ở Bước 6, 7, 8b.
 > - Career page lỗi: không có
 > - Đã mở 12 JD, bỏ qua 0 tin vì chạm trần
 > - SEEN_COUNT: 2.310
-> - Skill: v3.3
+> - Skill: v3.4
 >
 > 📋 Link tới Google Sheet: [Job Radar Tracker](#) — tab `jobs_detail` có đủ mọi tin từ trước tới nay, tab `archive` có tin cũ hơn 90 ngày.
 
@@ -487,6 +497,13 @@ Email dọn dẹp **luôn gửi**, kể cả `SKIPPED`, để bạn biết task 
 Chọn phương án này nếu muốn mỗi title một email riêng để lọc và lưu trữ độc lập.
 
 **Đổi lại:** Spark phải mở TopCV / ITviec / LinkedIn 5 lần cho mỗi thành phố thay vì 1 lần — cùng một trang, quét lặp 5 lượt. Tốn quota khoảng gấp 5, và 20 email mỗi ngày. Ngoài ra bạn chỉ được chạy tối đa 15 task đồng thời, và một schedule sẽ không chạy nếu đã có 15 task đang chạy — nên phải đặt giờ so le.
+
+**Lưu ý về giờ so le dưới đây:** mỗi task trong 10 task này vẫn quét đủ 16 URL career
+page (chỉ lọc theo nhóm vị trí ở bước sau, không giảm số career page phải mở), nên
+thời lượng một task riêng lẻ không nhẹ hơn task gộp bao nhiêu. Khoảng cách 5 phút ở
+bảng dưới **rất có thể không đủ** — cân nhắc giãn ra 15–20 phút mỗi task, hoặc chấp
+nhận vài task chạy chồng nhau (vẫn an toàn vì cùng ghi sheet theo đúng thứ tự
+`jobs_detail` trước `seen_urls`, chỉ là tốn thời gian hơn dự kiến).
 
 **Template** — thay 2 chỗ trong `{}`:
 

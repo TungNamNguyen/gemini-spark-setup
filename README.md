@@ -11,7 +11,7 @@ Mỗi automation nằm trong một thư mục riêng, gồm:
 
 | Thư mục | Việc làm | Trạng thái |
 |---|---|---|
-| [`vn-data-job-radar/`](vn-data-job-radar/) | Quét tin tuyển dụng ngành data (DA / AE / DE / BI / BA) tại Hà Nội và TP.HCM từ Gmail Job Alerts + 5 trang tuyển dụng (LinkedIn qua endpoint guest, không cần đăng nhập) + career page, chống trùng bằng Google Sheet, gửi email tổng hợp 2 lần/ngày; task dọn dẹp sheet riêng mỗi thứ Hai | Bản 3.3 |
+| [`vn-data-job-radar/`](vn-data-job-radar/) | Quét tin tuyển dụng ngành data (DA / AE / DE / BI / BA) tại Hà Nội và TP.HCM từ Gmail Job Alerts + 5 trang tuyển dụng (LinkedIn qua endpoint guest, không cần đăng nhập) + 16 URL career page cố định (quét hết toàn bộ trang), chống trùng bằng Google Sheet, gửi email tổng hợp 2 lần/ngày; task dọn dẹp sheet riêng mỗi thứ Hai | Bản 3.4 |
 
 ## Bắt đầu
 
@@ -28,6 +28,7 @@ Cần gói Google AI Pro/Ultra, tài khoản Google cá nhân, và đã bật Co
 - **Remote browser mặc định** — task chạy lúc máy tắt, không phụ thuộc Chrome local. Nguồn nào chặn bot thì bù bằng email alert.
 - **Thao tác xoá phải có guard** — mọi bước xoá dữ liệu trên sheet đều có ngưỡng an toàn và điều kiện chạy rõ ràng.
 - **Có health check trong output** — email luôn kèm số liệu để user tự biết hệ thống còn sống (ví dụ `SEEN_COUNT`).
+- **Không dừng chờ xác nhận nếu tránh được** — task chạy tự động theo lịch, không có ai trả lời. Chỉ mở domain/URL đã liệt kê sẵn trong skill, không tự đoán hay tìm URL mới giữa lúc chạy — domain lạ phát sinh là nguyên nhân phổ biến khiến Spark dừng lại xin quyền.
 
 ## Thêm automation mới
 
