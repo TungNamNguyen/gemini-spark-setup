@@ -12,6 +12,7 @@ Mỗi automation nằm trong một thư mục riêng, gồm:
 | Thư mục | Việc làm | Trạng thái |
 |---|---|---|
 | [`vn-data-job-radar/`](vn-data-job-radar/) | Quét tin tuyển dụng ngành data (DA / AE / DE / BI / BA) tại Hà Nội và TP.HCM từ Gmail Job Alerts + 5 trang tuyển dụng (LinkedIn qua endpoint guest, không cần đăng nhập) + 16 URL career page cố định (quét hết toàn bộ trang), chống trùng bằng Google Sheet, gửi email tổng hợp 2 lần/ngày; task dọn dẹp sheet riêng mỗi thứ Hai | Bản 3.4 |
+| [`tech-news-digest/`](tech-news-digest/) | Quét tin công nghệ hàng ngày từ Hacker News (Algolia API) + Reddit RSS (5 subs) + Dev.to API (6 tags) + Medium topic pages, phân loại 6 chủ đề (DE / AI / BE / CD / CR / DA), chấm điểm lọc bài hay, gửi email digest mỗi sáng. Không cần Sheet hay Gmail label — setup 10 phút | Bản 1.0 |
 
 ## Bắt đầu
 
