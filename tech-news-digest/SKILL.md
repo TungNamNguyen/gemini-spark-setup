@@ -36,9 +36,6 @@ Skill này chạy theo lịch lúc user offline. Vì vậy, trong suốt task:
 - **Không dùng Chrome local** — chỉ remote browser
 - Gặp lỗi ở một nguồn → ghi nhận, đi tiếp nguồn sau
 
-Những thứ platform bắt buộc xác nhận (gửi email, duyệt danh sách site) nằm ngoài
-tầm skill — cứ làm đúng bước và để hệ thống hỏi.
-
 ## Bước 1 — Quét Hacker News (Algolia API)
 
 Mở URL sau trong remote browser, đọc JSON response:

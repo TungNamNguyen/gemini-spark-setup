@@ -43,9 +43,6 @@ một lần chạy bị mất. Vì vậy, trong suốt task:
   vẫn gửi email, nói rõ bước nào lỗi. Chỉ dừng hẳn khi không đọc được `seen_urls`
   (vì khi đó không thể chống trùng)
 
-Những thứ platform bắt buộc xác nhận (gửi email, duyệt danh sách site) nằm ngoài
-tầm skill — không cố lách, cứ làm đúng bước và để hệ thống hỏi.
-
 Lọc trùng ở mode `full` và `quick` đều dựa vào `seen_urls`. **Không** lọc theo "tin đăng kể từ lần
 chạy trước" — chỉ cần URL chưa có trong SEEN là gửi.
 
