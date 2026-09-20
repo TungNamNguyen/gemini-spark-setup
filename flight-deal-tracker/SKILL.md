@@ -1,6 +1,6 @@
 ---
 name: flight-deal-tracker
-description: Theo dõi giá vé máy bay cho các route do user cấu hình trong Google Sheet, quét Skyscanner + Traveloka + trang khuyến mãi hãng bay VN, so sánh giá với lần quét trước, gửi email digest hàng ngày kèm alert khi giá giảm hoặc dưới ngân sách. Dùng khi cần theo dõi giá vé để mua đúng lúc rẻ.
+description: "Theo dõi giá vé máy bay cho các route do user cấu hình trong Google Sheet, quét Skyscanner, Traveloka và trang khuyến mãi hãng bay VN, so sánh giá với lần quét trước, gửi email digest hàng ngày kèm alert khi giá giảm hoặc dưới ngân sách. Dùng khi cần theo dõi giá vé để mua đúng lúc rẻ."
 ---
 # Flight Deal Tracker
 
@@ -16,7 +16,7 @@ bay, rồi gửi email digest tổng hợp.
 
 | Tham số | Giá trị hợp lệ | Mặc định | Ghi chú |
 | ------- | --------------- | -------- | ------- |
-| `mode` | `full` \| `promo` \| `cleanup` | `full` | `full` = quét Skyscanner + Traveloka + promo hãng bay. `promo` = chỉ quét trang khuyến mãi, bỏ Skyscanner/Traveloka — nhanh, dùng khi chỉ muốn xem flash sale. `cleanup` = dọn `price_log` cũ hơn 90 ngày, không quét gì |
+| `mode` | `full` / `promo` / `cleanup` | `full` | `full` = quét Skyscanner + Traveloka + promo hãng bay. `promo` = chỉ quét trang khuyến mãi, bỏ Skyscanner/Traveloka — nhanh, dùng khi chỉ muốn xem flash sale. `cleanup` = dọn `price_log` cũ hơn 90 ngày, không quét gì |
 
 Không hỏi lại user khi thiếu tham số — skill chạy tự động, không có ai trả lời.
 
@@ -44,7 +44,7 @@ Skill này chạy theo lịch lúc user offline. Vì vậy, trong suốt task:
 | `depart_date`, `return_date` | `yyyy-MM-dd` hoặc `không rõ` | `2026-12-05` |
 | `source` | Đúng một trong: `skyscanner`, `traveloka`, `vietjet_promo`, `vna_promo`, `bamboo_promo` | `skyscanner` |
 
-Trong email, giá hiển thị có dấu chấm phân cách + ₫: `2.450.000₫`.
+Trong email, giá hiển thị có dấu chấm phân cách + đ: `2.450.000đ`.
 Trong Sheet, giá là số nguyên thuần: `2450000`.
 
 Mọi phép tính dùng múi giờ Asia/Ho_Chi_Minh (GMT+7).
@@ -56,7 +56,7 @@ Sheet có 3 tab:
 | Tab | Cột | Vai trò |
 | --- | --- | ------- |
 | `routes` | A–H | **CHỈ ĐỌC.** User cấu hình route muốn theo dõi |
-| `price_log` | A–I | **GHI** mỗi lần quét + **đọc 5 dòng gần nhất** mỗi route (cho trend). Mode `cleanup` được đọc toàn bộ |
+| `price_log` | A–H | **GHI** mỗi lần quét + **đọc 5 dòng gần nhất** mỗi route (cho trend). Mode `cleanup` được đọc toàn bộ |
 | `deals` | A–E | **ĐỌC + GHI.** Chống gửi alert trùng |
 
 Header của `routes`:
@@ -94,14 +94,14 @@ Với mỗi route, validate:
 
 - `origin` và `destination`: 3 chữ cái viết hoa (IATA) hoặc 4 chữ (mã thành phố
   Skyscanner, xem bảng trên)
-- `travel_month`: đúng `yyyy-MM` và **chưa qua** (≥ tháng hiện tại)
-- `return_month`: rỗng (one-way) hoặc đúng `yyyy-MM` và ≥ `travel_month`
+- `travel_month`: đúng `yyyy-MM` và **chưa qua** (>= tháng hiện tại)
+- `return_month`: rỗng (one-way) hoặc đúng `yyyy-MM` và >= `travel_month`
 - `adults`: số nguyên 1–9
 - `max_budget`: số nguyên > 0 (VND)
 
 Route không hợp lệ → bỏ qua, ghi vào báo cáo cuối email (tên route + lý do).
 
-**Route hết hạn:** nếu `travel_month` đã qua (< tháng hiện tại), route đó
+**Route hết hạn:** nếu `travel_month` đã qua (trước tháng hiện tại), route đó
 không hợp lệ. Đếm số route hết hạn (`EXPIRED_COUNT`). Nếu `EXPIRED_COUNT > 0`,
 ghi dòng riêng trong khối báo cáo cuối email:
 `Route hết hạn: {EXPIRED_COUNT} ({danh sách route_name}) — cập nhật travel_month trong Sheet`
@@ -272,18 +272,18 @@ Tính:
 ```
 avg_5d = trung bình cheapest_price của các dòng tìm được (bỏ giá 0)
 yesterday_price = cheapest_price của dòng gần nhất (bỏ giá 0)
-change_pct = (today_price - yesterday_price) / yesterday_price × 100
+change_pct = (today_price - yesterday_price) / yesterday_price * 100
 ```
 
 Phân loại trend:
 
 | Trend | Điều kiện | Hiển thị |
 | ----- | --------- | -------- |
-| Giảm mạnh | `change_pct ≤ -15%` | `↓ {change_pct}% (mạnh)` |
-| Giảm | `-15% < change_pct ≤ -5%` | `↓ {change_pct}%` |
+| Giảm mạnh | `change_pct <= -15%` | `- {change_pct}% (giảm mạnh)` |
+| Giảm | `-15% < change_pct <= -5%` | `- {change_pct}% (giảm)` |
 | Ổn định | `-5% < change_pct < +5%` | `→` |
-| Tăng | `+5% ≤ change_pct < +15%` | `↑ +{change_pct}%` |
-| Tăng mạnh | `change_pct ≥ +15%` | `↑ +{change_pct}% (mạnh)` |
+| Tăng | `+5% <= change_pct < +15%` | `+ {change_pct}% (tăng)` |
+| Tăng mạnh | `change_pct >= +15%` | `+ {change_pct}% (tăng mạnh)` |
 | Lần đầu | Không có dữ liệu trước | `mới` |
 
 ### 5.3 Phát hiện deal
@@ -292,16 +292,15 @@ Một kết quả là **deal** nếu thoả **ít nhất 1** điều kiện:
 
 | Loại deal | Điều kiện | Ghi chú |
 | --------- | --------- | ------- |
-| Dưới budget | `today_price ≤ max_budget` | Dưới budget |
-| Giảm mạnh | `change_pct ≤ -15%` so với `avg_5d` | Giảm mạnh |
+| Dưới budget | `today_price <= max_budget` | Dưới budget |
+| Giảm mạnh | `change_pct <= -15%` so với `avg_5d` | Giảm mạnh |
 | Giá thấp lịch sử | `today_price` thấp hơn **mọi** giá trong 5 dòng gần nhất cùng route | Thấp nhất 5 ngày |
 
 **Chống alert trùng:** deal chỉ gửi nếu **không** có dòng nào trong tab `deals`
-với cùng `route` và `price` sai lệch ≤ 50.000₫ và `sent_at` trong 3 ngày gần nhất.
+với cùng `route` và `price` sai lệch <= 50.000đ và `sent_at` trong 3 ngày gần nhất.
 
-Ví dụ: route `HAN-BKK`, giá hôm nay 2.450.000₫, tab `deals` có dòng
-`HAN-BKK | 2420000 | skyscanner | 2026-09-19T08:00:00+07:00` → sai lệch 30.000₫
-< 50.000₫ và mới gửi hôm qua → **không gửi lại**.
+Ví dụ: route `HAN-BKK`, giá hôm nay 2.450.000đ, tab `deals` có dòng
+`HAN-BKK | 2420000 | skyscanner | 2026-09-19T08:00:00+07:00` → sai lệch 30.000đ (dưới ngưỡng 50.000đ) và mới gửi hôm qua → **không gửi lại**.
 
 ## Bước 6 — Ghi Sheet (LÀM TRƯỚC KHI GỬI EMAIL)
 
@@ -337,14 +336,14 @@ Gửi tới email của user. Dùng HTML, không dùng markdown thô.
 <h3>Bảng giá hôm nay ({n} route)</h3>
 <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">
   <tr><th>Route</th><th>Giá rẻ nhất</th><th>Hãng</th><th>Ngày bay</th><th>Budget</th><th>Trend</th><th>Link</th></tr>
-  <tr><td>Hà Nội → Bangkok</td><td>2.450.000₫</td><td>VietJet</td><td>05/12</td><td>3.000.000₫</td><td>↓ -12%</td><td><a href="{url}">Xem</a></td></tr>
-  <tr><td>TP.HCM → Seoul</td><td>7.800.000₫</td><td>VN Airlines</td><td>15/01</td><td>8.000.000₫</td><td>→</td><td><a href="{url}">Xem</a></td></tr>
+  <tr><td>Hà Nội → Bangkok</td><td>2.450.000đ</td><td>VietJet</td><td>05/12</td><td>3.000.000đ</td><td>-12%</td><td><a href="{url}">Xem</a></td></tr>
+  <tr><td>TP.HCM → Seoul</td><td>7.800.000đ</td><td>VN Airlines</td><td>15/01</td><td>8.000.000đ</td><td>→</td><td><a href="{url}">Xem</a></td></tr>
 </table>
 
 <h3>Deal nổi bật ({m})</h3>
 <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">
   <tr><th>Route</th><th>Giá</th><th>Hãng</th><th>Vì sao là deal</th><th>Link</th></tr>
-  <tr><td>Hà Nội → Đà Nẵng</td><td>890.000₫</td><td>VietJet</td><td>Giảm 25% — Thấp nhất 5 ngày</td><td><a href="{url}">Xem</a></td></tr>
+  <tr><td>Hà Nội → Đà Nẵng</td><td>890.000đ</td><td>VietJet</td><td>Giảm 25% — Thấp nhất 5 ngày</td><td><a href="{url}">Xem</a></td></tr>
 </table>
 
 <h3>Khuyến mãi hãng bay</h3>
@@ -370,7 +369,7 @@ Gửi tới email của user. Dùng HTML, không dùng markdown thô.
 
 - Dùng đúng các thẻ và thứ tự trong khung. **Không** thêm CSS, màu nền, font, ảnh,
   `<div>`/`<span>` — Gmail bỏ phần lớn CSS
-- **Giá:** format `X.XXX.XXX₫` có dấu chấm phân cách ngàn. Ví dụ `2.450.000₫`
+- **Giá:** format `X.XXX.XXXđ` có dấu chấm phân cách ngàn. Ví dụ `2.450.000đ`
 - **Route:** dùng `route_name` từ Sheet (ví dụ "Hà Nội → Bangkok"), không dùng code
 - **Không dùng icon/emoji** trong tiêu đề, bảng giá hay email để giữ giao diện sạch sẽ, chuyên nghiệp
 - **Section không có dữ liệu → bỏ hẳn** cả `<h3>` lẫn bảng:
@@ -392,9 +391,9 @@ Khi `mode = cleanup`, **bỏ qua toàn bộ Bước 1–7**. Chỉ làm:
 
 1. Đếm `LOG_BEFORE` (dòng trong `price_log`) và `DEALS_BEFORE` (dòng trong `deals`)
 2. **Guard 1:** nếu `LOG_BEFORE < 30` → SKIPPED, lý do "chưa đủ dữ liệu để dọn"
-3. Tính `CUTOFF = now − 90 ngày`
+3. Tính `CUTOFF = now - 90 ngày`
 4. Đếm số dòng cần xoá trong `price_log` (có `checked_at < CUTOFF`) → `OLD_COUNT`
-5. **Guard 2:** nếu `OLD_COUNT > 80%` × `LOG_BEFORE` → BLOCKED, lý do
+5. **Guard 2:** nếu `OLD_COUNT > 80%` * `LOG_BEFORE` → BLOCKED, lý do
    "{OLD_COUNT}/{LOG_BEFORE} dòng vượt ngưỡng 80%, bất thường, cần user kiểm tra"
 6. Xoá dòng cũ trong `price_log`
 7. Xoá dòng trong `deals` có `sent_at < CUTOFF`
