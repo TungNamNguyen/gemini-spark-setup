@@ -230,18 +230,18 @@ Google Sheet "Flight Deal Tracker". Nếu chưa đủ 30 dòng thì SKIPPED.
 >
 > | Route | Giá rẻ nhất | Hãng | Ngày bay | Budget | Trend | Link |
 > |---|---|---|---|---|---|---|
-> | Hà Nội → Bangkok | 2.450.000₫ | VietJet | 05/12 | 3.000.000₫ | ↓ -12% | Xem |
-> | TP.HCM → Seoul | 7.800.000₫ | VN Airlines | 15/01 | 8.000.000₫ | → | Xem |
-> | Hà Nội → TP.HCM | 890.000₫ | VietJet | 20/11 | 1.500.000₫ | ↓ -25% (mạnh) | Xem |
-> | Hà Nội → Đà Nẵng | 1.200.000₫ | Bamboo | 10/12 | 2.000.000₫ | → | Xem |
-> | TP.HCM → Phú Quốc | 980.000₫ | VietJet | 18/12 | 1.200.000₫ | mới | Xem |
+> | Hà Nội → Bangkok | 2.450.000đ | VietJet | 05/12 | 3.000.000đ | ↓ -12% | Xem |
+> | TP.HCM → Seoul | 7.800.000đ | VN Airlines | 15/01 | 8.000.000đ | → | Xem |
+> | Hà Nội → TP.HCM | 890.000đ | VietJet | 20/11 | 1.500.000đ | ↓ -25% (mạnh) | Xem |
+> | Hà Nội → Đà Nẵng | 1.200.000đ | Bamboo | 10/12 | 2.000.000đ | → | Xem |
+> | TP.HCM → Phú Quốc | 980.000đ | VietJet | 18/12 | 1.200.000đ | mới | Xem |
 >
 > **Deal nổi bật (2)**
 >
 > | Route | Giá | Hãng | Vì sao là deal | Link |
 > |---|---|---|---|---|
-> | Hà Nội → Bangkok | 2.450.000₫ | VietJet | Dưới budget 3tr — ↓ -12% | Xem |
-> | Hà Nội → TP.HCM | 890.000₫ | VietJet | Giảm 25% — Thấp nhất 5 ngày | Xem |
+> | Hà Nội → Bangkok | 2.450.000đ | VietJet | Dưới budget 3tr — ↓ -12% | Xem |
+> | Hà Nội → TP.HCM | 890.000đ | VietJet | Giảm 25% — Thấp nhất 5 ngày | Xem |
 >
 > **Khuyến mãi hãng bay**
 > - **VietJet:** Bay khắp Việt Nam từ 0đ — đến 30/09 — Xem
