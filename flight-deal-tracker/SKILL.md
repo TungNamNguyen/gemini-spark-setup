@@ -1,8 +1,8 @@
 ---
-name: flight-deal-tracker
+name: air-deal-radar
 description: Theo dõi giá vé máy bay cho các route do user cấu hình trong Google Sheet, quét Skyscanner, Traveloka và trang khuyến mãi hãng bay VN, so sánh giá với lần quét trước, gửi email digest hàng ngày kèm alert khi giá giảm hoặc dưới ngân sách. Dùng khi cần theo dõi giá vé để mua đúng lúc rẻ.
 ---
-# Flight Deal Tracker
+# Air Deal Radar
 
 **Phiên bản skill: 1.0.** Luôn ghi số này vào dòng `Skill:` trong khối báo cáo cuối email.
 
