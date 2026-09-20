@@ -17,7 +17,7 @@ Thời gian setup: **10 phút**.
 | ------------ | -------- | -------------------------------- |
 | Spark Skill  | 1        | `tech-news-digest`               |
 | Spark Task   | 1        | Digest hàng ngày                 |
-| Schedule     | 1        | 07:00 hàng ngày                  |
+| Schedule     | 1        | 11:00 hàng ngày                  |
 | Google Sheet | 0        | Không cần                        |
 | Gmail label  | 0        | Không cần                        |
 
@@ -69,7 +69,7 @@ Kiểm tra email: tìm `[Tech Digest]` trong Gmail.
 
 ## Bước 5 — Đặt lịch (1 phút)
 
-Đặt schedule chạy **07:00 hàng ngày**.
+Đặt schedule chạy **11:00 hàng ngày**.
 
 Setup xong! 🎉
 

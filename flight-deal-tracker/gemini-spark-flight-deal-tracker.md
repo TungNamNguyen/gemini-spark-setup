@@ -18,7 +18,7 @@ Thời gian setup: **15 phút**.
 | ------------ | -------- | ------------------------------------------------- |
 | Spark Skill  | 1        | `flight-deal-tracker`                             |
 | Spark Task   | 2        | Quét giá hàng ngày + Dọn dẹp hàng tháng          |
-| Schedule     | 2        | 08:00 hàng ngày + 07:00 mùng 1 hàng tháng        |
+| Schedule     | 2        | 14:00 hàng ngày + 06:00 mùng 1 hàng tháng        |
 | Google Sheet | 1        | `Flight Deal Tracker` (3 tab)                     |
 | Gmail label  | 0        | Không cần                                         |
 
@@ -164,13 +164,15 @@ Kiểm tra: thấy skill `flight-deal-tracker` trong danh sách.
 Mở thread Task 1, nhắn:
 
 ```
-Tạo lịch: mỗi ngày lúc 08:00 giờ Việt Nam, chạy với mode: full.
+Tạo lịch: mỗi ngày lúc 14:00 giờ Việt Nam, chạy với mode: full.
 ```
+
+> **Tại sao 14:00?** Để so le hoàn hảo với các skill khác trong repo (Job Radar HN 08:00, HCM 09:30, Tech News 11:00, Job Radar chiều 17:30). Đồng thời 14:00 là thời điểm vừa kết thúc đợt flash sale trưa (12:00–14:00) của các hãng bay (như VietJet), giá vé trong ngày đã cập nhật ổn định nhất để quét và chốt giá.
 
 Tạo Task 2 (Dọn dẹp) theo instruction ở mục [Nội dung Task](#nội-dung-task), rồi nhắn:
 
 ```
-Tạo lịch: mùng 1 hàng tháng lúc 07:00 giờ Việt Nam, chạy với mode: cleanup.
+Tạo lịch: mùng 1 hàng tháng lúc 06:00 giờ Việt Nam, chạy với mode: cleanup.
 ```
 
 Setup xong! 🎉
@@ -211,8 +213,8 @@ Google Sheet "Flight Deal Tracker". Nếu chưa đủ 30 dòng thì SKIPPED.
 
 | Task         | Lịch                       |
 | ------------ | -------------------------- |
-| Quét giá     | 08:00 hàng ngày            |
-| Dọn dẹp      | 07:00 mùng 1 hàng tháng   |
+| Quét giá     | 14:00 hàng ngày            |
+| Dọn dẹp      | 06:00 mùng 1 hàng tháng   |
 
 ---
 
