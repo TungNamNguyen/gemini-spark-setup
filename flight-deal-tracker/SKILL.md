@@ -1,6 +1,6 @@
 ---
 name: flight-deal-tracker
-description: "Theo dõi giá vé máy bay cho các route do user cấu hình trong Google Sheet, quét Skyscanner, Traveloka và trang khuyến mãi hãng bay VN, so sánh giá với lần quét trước, gửi email digest hàng ngày kèm alert khi giá giảm hoặc dưới ngân sách. Dùng khi cần theo dõi giá vé để mua đúng lúc rẻ."
+description: Theo dõi giá vé máy bay cho các route do user cấu hình trong Google Sheet, quét Skyscanner, Traveloka và trang khuyến mãi hãng bay VN, so sánh giá với lần quét trước, gửi email digest hàng ngày kèm alert khi giá giảm hoặc dưới ngân sách. Dùng khi cần theo dõi giá vé để mua đúng lúc rẻ.
 ---
 # Flight Deal Tracker
 
@@ -382,8 +382,7 @@ Gửi tới email của user. Dùng HTML, không dùng markdown thô.
 - **Link sheet:** trỏ tới đúng file `Flight Deal Tracker`
 
 **Nếu không có route active nào:** tiêu đề `[Flight Deals] {dd/MM} — chưa có route`.
-Thân email: `<p>Chưa có route nào trong Sheet. Thêm route vào tab <code>routes</code>
-để bắt đầu theo dõi.</p>`, rồi `<hr>`, khối báo cáo, link sheet.
+Thân email: một dòng `<p>Chưa có route nào trong Sheet. Thêm route vào tab routes để bắt đầu theo dõi.</p>`, rồi `<hr>`, khối báo cáo, link sheet.
 
 ## Chế độ `cleanup` — Dọn dẹp
 
