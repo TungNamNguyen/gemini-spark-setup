@@ -226,24 +226,24 @@ Google Sheet "Flight Deal Tracker". Nếu chưa đủ 30 dòng thì SKIPPED.
 
 > Hôm nay có 5 route đang theo dõi. Route Hà Nội → Bangkok giảm 12% xuống 2.45 triệu, dưới budget.
 >
-> **📊 Bảng giá hôm nay (5 route)**
+> **Bảng giá hôm nay (5 route)**
 >
 > | Route | Giá rẻ nhất | Hãng | Ngày bay | Budget | Trend | Link |
 > |---|---|---|---|---|---|---|
-> | Hà Nội → Bangkok | 2.450.000₫ ✅ | VietJet | 05/12 | 3.000.000₫ | ↓ -12% | Xem |
+> | Hà Nội → Bangkok | 2.450.000₫ | VietJet | 05/12 | 3.000.000₫ | ↓ -12% | Xem |
 > | TP.HCM → Seoul | 7.800.000₫ | VN Airlines | 15/01 | 8.000.000₫ | → | Xem |
-> | Hà Nội → TP.HCM | 890.000₫ ✅🔥 | VietJet | 20/11 | 1.500.000₫ | ↓ -25% | Xem |
-> | Hà Nội → Đà Nẵng | 1.200.000₫ ✅ | Bamboo | 10/12 | 2.000.000₫ | → | Xem |
-> | TP.HCM → Phú Quốc | 980.000₫ ✅ | VietJet | 18/12 | 1.200.000₫ | 🆕 mới | Xem |
+> | Hà Nội → TP.HCM | 890.000₫ | VietJet | 20/11 | 1.500.000₫ | ↓ -25% (mạnh) | Xem |
+> | Hà Nội → Đà Nẵng | 1.200.000₫ | Bamboo | 10/12 | 2.000.000₫ | → | Xem |
+> | TP.HCM → Phú Quốc | 980.000₫ | VietJet | 18/12 | 1.200.000₫ | mới | Xem |
 >
-> **🔥 Deal nổi bật (2)**
+> **Deal nổi bật (2)**
 >
 > | Route | Giá | Hãng | Vì sao là deal | Link |
 > |---|---|---|---|---|
-> | Hà Nội → Bangkok | 2.450.000₫ | VietJet | ✅ Dưới budget 3tr — ↓ -12% | Xem |
-> | Hà Nội → TP.HCM | 890.000₫ | VietJet | 🔥 Giảm 25% — ⭐ Thấp nhất 5 ngày | Xem |
+> | Hà Nội → Bangkok | 2.450.000₫ | VietJet | Dưới budget 3tr — ↓ -12% | Xem |
+> | Hà Nội → TP.HCM | 890.000₫ | VietJet | Giảm 25% — Thấp nhất 5 ngày | Xem |
 >
-> **🛩 Khuyến mãi hãng bay**
+> **Khuyến mãi hãng bay**
 > - **VietJet:** Bay khắp Việt Nam từ 0đ — đến 30/09 — Xem
 > - **Vietnam Airlines:** Không có khuyến mãi mới
 > - **Bamboo Airways:** Côn Đảo mùa đông từ 499k — đến 15/10 — Xem
@@ -256,7 +256,7 @@ Google Sheet "Flight Deal Tracker". Nếu chưa đủ 30 dòng thì SKIPPED.
 > - Deal mới: 2
 > - Skill: v1.0
 >
-> 📋 [Flight Deal Tracker](#) — tab `price_log` có lịch sử giá, tab `routes` để thêm/sửa route.
+> [Flight Deal Tracker](#) — tab `price_log` có lịch sử giá, tab `routes` để thêm/sửa route.
 
 ## Email dọn dẹp (hàng tháng)
 
@@ -266,7 +266,7 @@ Google Sheet "Flight Deal Tracker". Nếu chưa đủ 30 dòng thì SKIPPED.
 > - price_log: 150 → 120 dòng
 > - deals: 45 → 32 dòng
 >
-> 📋 [Flight Deal Tracker](#)
+> [Flight Deal Tracker](#)
 
 ---
 

@@ -279,22 +279,22 @@ Phân loại trend:
 
 | Trend | Điều kiện | Hiển thị |
 | ----- | --------- | -------- |
-| Giảm mạnh | `change_pct ≤ -15%` | `🔥 ↓ {change_pct}%` |
+| Giảm mạnh | `change_pct ≤ -15%` | `↓ {change_pct}% (mạnh)` |
 | Giảm | `-15% < change_pct ≤ -5%` | `↓ {change_pct}%` |
 | Ổn định | `-5% < change_pct < +5%` | `→` |
 | Tăng | `+5% ≤ change_pct < +15%` | `↑ +{change_pct}%` |
-| Tăng mạnh | `change_pct ≥ +15%` | `⚠️ ↑ +{change_pct}%` |
-| Lần đầu | Không có dữ liệu trước | `🆕 mới` |
+| Tăng mạnh | `change_pct ≥ +15%` | `↑ +{change_pct}% (mạnh)` |
+| Lần đầu | Không có dữ liệu trước | `mới` |
 
 ### 5.3 Phát hiện deal
 
 Một kết quả là **deal** nếu thoả **ít nhất 1** điều kiện:
 
-| Loại deal | Điều kiện | Icon |
-| --------- | --------- | ---- |
-| Dưới budget | `today_price ≤ max_budget` | ✅ |
-| Giảm mạnh | `change_pct ≤ -15%` so với `avg_5d` | 🔥 |
-| Giá thấp lịch sử | `today_price` thấp hơn **mọi** giá trong 5 dòng gần nhất cùng route | ⭐ |
+| Loại deal | Điều kiện | Ghi chú |
+| --------- | --------- | ------- |
+| Dưới budget | `today_price ≤ max_budget` | Dưới budget |
+| Giảm mạnh | `change_pct ≤ -15%` so với `avg_5d` | Giảm mạnh |
+| Giá thấp lịch sử | `today_price` thấp hơn **mọi** giá trong 5 dòng gần nhất cùng route | Thấp nhất 5 ngày |
 
 **Chống alert trùng:** deal chỉ gửi nếu **không** có dòng nào trong tab `deals`
 với cùng `route` và `price` sai lệch ≤ 50.000₫ và `sent_at` trong 3 ngày gần nhất.
@@ -334,20 +334,20 @@ Gửi tới email của user. Dùng HTML, không dùng markdown thô.
 ```html
 <p>{Mở đầu 1–2 câu: tổng route, route nào có deal, route nào giảm/tăng mạnh nhất.}</p>
 
-<h3>📊 Bảng giá hôm nay ({n} route)</h3>
+<h3>Bảng giá hôm nay ({n} route)</h3>
 <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">
   <tr><th>Route</th><th>Giá rẻ nhất</th><th>Hãng</th><th>Ngày bay</th><th>Budget</th><th>Trend</th><th>Link</th></tr>
-  <tr><td>Hà Nội → Bangkok</td><td>2.450.000₫ ✅</td><td>VietJet</td><td>05/12</td><td>3.000.000₫</td><td>↓ -12%</td><td><a href="{url}">Xem</a></td></tr>
+  <tr><td>Hà Nội → Bangkok</td><td>2.450.000₫</td><td>VietJet</td><td>05/12</td><td>3.000.000₫</td><td>↓ -12%</td><td><a href="{url}">Xem</a></td></tr>
   <tr><td>TP.HCM → Seoul</td><td>7.800.000₫</td><td>VN Airlines</td><td>15/01</td><td>8.000.000₫</td><td>→</td><td><a href="{url}">Xem</a></td></tr>
 </table>
 
-<h3>🔥 Deal nổi bật ({m})</h3>
+<h3>Deal nổi bật ({m})</h3>
 <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">
   <tr><th>Route</th><th>Giá</th><th>Hãng</th><th>Vì sao là deal</th><th>Link</th></tr>
-  <tr><td>Hà Nội → Đà Nẵng</td><td>890.000₫</td><td>VietJet</td><td>🔥 Giảm 25% — ⭐ Thấp nhất 5 ngày</td><td><a href="{url}">Xem</a></td></tr>
+  <tr><td>Hà Nội → Đà Nẵng</td><td>890.000₫</td><td>VietJet</td><td>Giảm 25% — Thấp nhất 5 ngày</td><td><a href="{url}">Xem</a></td></tr>
 </table>
 
-<h3>🛩 Khuyến mãi hãng bay</h3>
+<h3>Khuyến mãi hãng bay</h3>
 <ul>
   <li><b>VietJet:</b> Bay khắp Việt Nam từ 0đ — đến 30/09 — <a href="{url}">Xem</a></li>
   <li><b>Vietnam Airlines:</b> Ưu đãi mùa đông Tokyo, Seoul — đến 15/10 — <a href="{url}">Xem</a></li>
@@ -363,7 +363,7 @@ Gửi tới email của user. Dùng HTML, không dùng markdown thô.
   <li>Deal mới: {M} ({đã gửi alert} + {trùng, bỏ qua})</li>
   <li>Skill: v1.0</li>
 </ul>
-<p>📋 <a href="{url}">Flight Deal Tracker</a> — tab <code>price_log</code> có lịch sử giá, tab <code>routes</code> để thêm/sửa route.</p>
+<p><a href="{url}">Flight Deal Tracker</a> — tab <code>price_log</code> có lịch sử giá, tab <code>routes</code> để thêm/sửa route.</p>
 ```
 
 **Quy tắc dựng:**
@@ -372,12 +372,12 @@ Gửi tới email của user. Dùng HTML, không dùng markdown thô.
   `<div>`/`<span>` — Gmail bỏ phần lớn CSS
 - **Giá:** format `X.XXX.XXX₫` có dấu chấm phân cách ngàn. Ví dụ `2.450.000₫`
 - **Route:** dùng `route_name` từ Sheet (ví dụ "Hà Nội → Bangkok"), không dùng code
-- **Icon deal:** thêm sau giá: `✅` (dưới budget), `🔥` (giảm mạnh), `⭐` (thấp lịch sử)
+- **Không dùng icon/emoji** trong tiêu đề, bảng giá hay email để giữ giao diện sạch sẽ, chuyên nghiệp
 - **Section không có dữ liệu → bỏ hẳn** cả `<h3>` lẫn bảng:
   - "Bảng giá hôm nay": bỏ nếu `mode = promo`
   - "Deal nổi bật": bỏ nếu không có deal mới
   - "Khuyến mãi hãng bay": **luôn hiện** (ghi "Không có khuyến mãi mới" nếu trống)
-- **Trong bảng giá:** sắp xếp: route có deal lên trước (⭐ → 🔥 → ✅),
+- **Trong bảng giá:** sắp xếp: route có deal lên trước (thấp nhất 5 ngày → giảm mạnh → dưới budget),
   sau đó route giảm giá, cuối cùng route tăng giá hoặc ổn định
 - **Khối báo cáo:** luôn đủ 5 dòng, đúng thứ tự. Dòng nào trống ghi `không có`
 - **Link sheet:** trỏ tới đúng file `Flight Deal Tracker`
