@@ -16,7 +16,7 @@ Thời gian setup: **15 phút**.
 
 | Thành phần   | Số lượng | Ghi chú                                          |
 | ------------ | -------- | ------------------------------------------------- |
-| Spark Skill  | 1        | `flight-deal-tracker`                             |
+| Spark Skill  | 1        | `air-deal-radar`                                  |
 | Spark Task   | 2        | Quét giá hàng ngày + Dọn dẹp hàng tháng          |
 | Schedule     | 2        | 14:00 hàng ngày + 06:00 mùng 1 hàng tháng        |
 | Google Sheet | 1        | `Flight Deal Tracker` (3 tab)                     |
@@ -129,14 +129,14 @@ File `Flight Deal Tracker` phải có đúng 3 tab: `routes`, `price_log`, `deal
 1. gemini.google.com → **Menu → Spark → Skills → Create skill**
 2. Mở file `SKILL.md` cùng thư mục, copy **toàn bộ** (cả khối `---`), dán vào, Lưu
 
-Kiểm tra: thấy skill `flight-deal-tracker` trong danh sách.
+Kiểm tra: thấy skill `air-deal-radar` trong danh sách.
 
 ## Bước 5 — Tạo Task & Test (5 phút)
 
 1. **Menu → Spark** → ô nhập
 2. Copy instruction **Task 1** ở mục [Nội dung Task](#nội-dung-task)
 3. **Thay `[ĐIỀN EMAIL CỦA BẠN]` bằng email thật**
-4. Gõ `/` rồi chọn `flight-deal-tracker`
+4. Gõ `/` rồi chọn `air-deal-radar`
 5. Submit — chạy ngay, chờ ~10 phút
 
 **Lần chạy đầu Spark sẽ hỏi:**
@@ -199,7 +199,7 @@ Làm đúng theo skill, đặc biệt:
 ## Task 2 — Dọn dẹp hàng tháng
 
 ```
-Dùng skill /flight-deal-tracker.
+Dùng skill /air-deal-radar.
 
 Tham số:
 - mode: cleanup
