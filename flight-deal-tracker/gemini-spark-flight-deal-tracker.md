@@ -1,6 +1,6 @@
 # Gemini Spark — Flight Deal Tracker
 
-**Phiên bản 1.0** — theo dõi giá vé máy bay cho các route cấu hình sẵn trong Google Sheet, quét Skyscanner + Traveloka + trang khuyến mãi hãng bay VN, so sánh giá theo ngày, alert khi có deal rẻ. Không cần Gmail label.
+**Phiên bản 1.0** — theo dõi giá vé máy bay cho các route cấu hình sẵn trong Google Sheet, dùng 100% remote browser quét Google Flights và các trang khuyến mãi hãng bay VN (VietJet, Vietnam Airlines, Bamboo), so sánh giá theo ngày, alert khi có deal hời. Không cần Gmail label.
 
 Thời gian setup: **15 phút**.
 
@@ -16,7 +16,7 @@ Thời gian setup: **15 phút**.
 
 | Thành phần   | Số lượng | Ghi chú                                          |
 | ------------ | -------- | ------------------------------------------------- |
-| Spark Skill  | 1        | `air-deal-radar`                                  |
+| Spark Skill  | 1        | `flight-deal-tracker`                             |
 | Spark Task   | 2        | Quét giá hàng ngày + Dọn dẹp hàng tháng          |
 | Schedule     | 2        | 14:00 hàng ngày + 06:00 mùng 1 hàng tháng        |
 | Google Sheet | 1        | `Flight Deal Tracker` (3 tab)                     |
@@ -27,10 +27,11 @@ Luồng:
 ```
 Google Sheet (routes)
         │
-        ▼
-Skyscanner ─────┐
-Traveloka ──────┤
-Promo pages ────┘
+        ▼ (100% remote browser)
+Google Flights ─────┐
+VietJet Promo ──────┤
+VNA Promo ──────────┤
+Bamboo Promo ───────┘
         │
         ▼
 So sánh giá ──► ghi price_log ──► email digest
@@ -129,14 +130,14 @@ File `Flight Deal Tracker` phải có đúng 3 tab: `routes`, `price_log`, `deal
 1. gemini.google.com → **Menu → Spark → Skills → Create skill**
 2. Mở file `SKILL.md` cùng thư mục, copy **toàn bộ** (cả khối `---`), dán vào, Lưu
 
-Kiểm tra: thấy skill `air-deal-radar` trong danh sách.
+Kiểm tra: thấy skill `flight-deal-tracker` trong danh sách.
 
 ## Bước 5 — Tạo Task & Test (5 phút)
 
 1. **Menu → Spark** → ô nhập
 2. Copy instruction **Task 1** ở mục [Nội dung Task](#nội-dung-task)
 3. **Thay `[ĐIỀN EMAIL CỦA BẠN]` bằng email thật**
-4. Gõ `/` rồi chọn `air-deal-radar`
+4. Gõ `/` rồi chọn `flight-deal-tracker`
 5. Submit — chạy ngay, chờ ~10 phút
 
 **Lần chạy đầu Spark sẽ hỏi:**
@@ -155,9 +156,7 @@ Kiểm tra: thấy skill `air-deal-radar` trong danh sách.
 3. ☑ Tab `price_log` có dòng mới, cột `cheapest_price` là số hợp lý
 4. ☑ Cuối email có khối báo cáo, dòng `Skill: v1.0`
 5. ☑ Link "Flight Deal Tracker" cuối email mở đúng file Sheet
-6. ☑ Xem "Nguồn không truy cập được" — Skyscanner/Traveloka có bị captcha không?
-   Nếu cả 2 đều bị chặn ở lần chạy đầu, đợi vài giờ rồi thử lại (IP remote browser
-   có thể đổi)
+6. ☑ Xem "Nguồn không truy cập được" — Google Flights và các hãng bay có mở trơn tru không
 
 ## Bước 6 — Đặt lịch (2 phút)
 
@@ -192,14 +191,14 @@ Tham số:
 
 Làm đúng theo skill, đặc biệt:
 - Bước 1 đọc tab "routes" của Google Sheet "Flight Deal Tracker" TRƯỚC mọi việc khác
-- Bước 6 ghi Sheet TRƯỚC khi gửi email
-- Dùng remote browser, không cần Chrome local
+- Bước 5 ghi Sheet TRƯỚC khi gửi email
+- 100% dùng remote browser, không cần Chrome local
 ```
 
 ## Task 2 — Dọn dẹp hàng tháng
 
 ```
-Dùng skill /air-deal-radar.
+Dùng skill /flight-deal-tracker.
 
 Tham số:
 - mode: cleanup
